@@ -26,10 +26,3 @@ services:
     App\Controller\:
         resource: '../src/Controller/'
         tags: ['controller.service_arguments']
-
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
-    App\Validator\ApiPhoneValidator:
-        arguments:
-            $apiKey: '%env(NUM_VERIFY_API_KEY)%'
-            $apiUrl: '%env(NUM_VERIFY_API_URL)%'

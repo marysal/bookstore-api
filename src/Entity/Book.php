@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\BookRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -12,6 +13,12 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class Book
 {
+
+    public function __construct()
+    {
+        $this->books = new ArrayCollection();
+    }
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -37,6 +44,11 @@ class Book
      * @Assert\Choice({"prose", "poetry"})
      */
     private $type;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Book", mappedBy="authors")
+     */
+    private $books;
 
     public function getId(): ?int
     {
@@ -89,5 +101,41 @@ class Book
     public function setType(string $type): void
     {
         $this->type = $type;
+    }
+
+    /**
+     * @return ArrayCollection|Book[]
+     */
+    public function getBooks(): ArrayCollection
+    {
+        return $this->books;
+    }
+
+    /**
+     * @param Book $book
+     * @return Book
+     */
+    public function setBook(Book $book): self
+    {
+        if (!$this->books->contains($book)) {
+            $this->books[] = $book;
+            //$book->addAuthor($this);
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * @param Book $book
+     * @return Book
+     */
+    public function deleteBook(Book $book): self
+    {
+        if ($this->books->contains($book)) {
+            $this->books->removeElement($book);
+        }
+
+        return $this;
     }
 }

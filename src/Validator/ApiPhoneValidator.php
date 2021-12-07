@@ -8,26 +8,18 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ApiPhoneValidator extends ConstraintValidator
 {
+    private const NUM_VERIFY_API_URL = "http://apilayer.net/api/validate";
+
+    private const NUM_VERIFY_API_KEY = "d16d7006aff743dc2cd293c3a4c44be0";
+
     /**
      * @var HttpClientInterface
      */
     private $client;
 
-    /**
-     * @var string
-     */
-    private $apiKey;
-
-    /**
-     * @var string
-     */
-    private $apiUrl;
-
-    public function __construct(HttpClientInterface $client, string $apiKey, string $apiUrl)
+    public function __construct(HttpClientInterface $client)
     {
         $this->client = $client;
-        $this->apiKey = $apiKey;
-        $this->apiUrl = $apiUrl;
     }
 
     public function validate($value, Constraint $constraint)
@@ -38,12 +30,12 @@ class ApiPhoneValidator extends ConstraintValidator
         } else {
             $response = $this->client->request(
                 'GET',
-                $this->apiUrl,
+                self::NUM_VERIFY_API_URL,
                 [
                     'query' => [
-                        'access_key' => $this->apiKey,
+                        'access_key' => self::NUM_VERIFY_API_KEY,
                         'number' => $value,
-                        'format' => 1 // JSON response
+                        'format' => 1
                     ]
                 ]
             );
