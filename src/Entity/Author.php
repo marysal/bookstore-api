@@ -20,7 +20,8 @@ class Author
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=256)
+     * @ORM\Column(type="string", length=255)
+     * @Assert\Length(min=10, max=255)
      * @Assert\NotBlank()
      */
     private $name;
