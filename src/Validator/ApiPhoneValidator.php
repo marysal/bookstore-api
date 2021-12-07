@@ -12,10 +12,12 @@ class ApiPhoneValidator extends ConstraintValidator
      * @var HttpClientInterface
      */
     private $client;
+
     /**
      * @var string
      */
     private $apiKey;
+
     /**
      * @var string
      */
