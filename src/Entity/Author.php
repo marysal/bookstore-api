@@ -26,9 +26,10 @@ class Author
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, unique=true)
      * @Assert\Length(min=10, max=255)
      * @Assert\NotBlank()
+     * @Assert\Unique()
      */
     private $name;
 

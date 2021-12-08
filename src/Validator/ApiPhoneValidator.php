@@ -24,9 +24,9 @@ class ApiPhoneValidator extends ConstraintValidator
 
     public function validate($value, Constraint $constraint)
     {
-        $value = preg_replace('/\D/', '', $value);
-        if (empty($value)){
-            $this->context->addViolation("Phone cannot be empty");
+        $phone = preg_replace('/[^0-9]/', '', $value);
+        if(empty($phone)) {
+            $this->context->addViolation("Phone can not be empty");
         } else {
             $response = $this->client->request(
                 'GET',
@@ -34,20 +34,17 @@ class ApiPhoneValidator extends ConstraintValidator
                 [
                     'query' => [
                         'access_key' => self::NUM_VERIFY_API_KEY,
-                        'number' => $value,
+                        'number' => $phone,
                         'format' => 1
                     ]
                 ]
             );
 
             $data = $response->toArray();
-            if (!isset($data['valid'])) {
-                $this->context->addViolation('Phone API validation error');
-            }
-            if (isset($data['valid']) && $data['valid'] === false) {
+            if (empty($data['valid'])) {
                 /** @var PhoneConstraint $constraint */
                 $this->context->buildViolation($constraint->message)
-                    ->setParameter('{{phone}}', $value)
+                    ->setParameter('{{phone}}', $phone)
                     ->addViolation();
             }
         }
