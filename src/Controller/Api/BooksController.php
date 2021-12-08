@@ -132,22 +132,35 @@ class BooksController extends AbstractController
     ): Response {
         try {
             $book = $bookRepository->find($id);
-            $title = $request->get('title', "");
-            $description = $request->get('description', "");
-            $type = $request->get('type', "");
+            //$title = $request->get('title', "");
+            //$description = $request->get('description', "");
+            //$type = $request->get('type', "");
             //$authors = $request->get('authors', []);
             if ($book) {
-                $changedBook = $this->editEntityService->changeBook(
-                    $book,
-                    $title,
-                    $description,
-                    $type
+                //$changedBook = $this->editEntityService->changeBook(
+                    //$book,
+                    //$request->get('title', ""),
+                    //$request->get('title', ""),
+                    //$request->get('type', "")
                 //$authors
-                );
+                //);
 
-                //$this->entityManager->persist($changedBook);
+                if (!empty($request->get('title', ""))) {
+                    $book->setTitle($request->get('title', ""));
+                }
 
-                $errors = (string) $validator->validate($changedBook);
+                if(!empty($request->get('title', ""))) {
+                    $book->setDescription($request->get('title', ""));
+                }
+
+                if(!empty($request->get('type', ""))) {
+                    $book->setType($request->get('type', ""));
+                }
+
+                $errors = (string) $validator->validate($book);
+
+                $this->entityManager->persist($book);
+                $this->entityManager->flush();
 
                 if(!empty($errors)) {
                     throw new \Exception($errors);

@@ -16,10 +16,8 @@ class EditEntityService
         string $description,
         string $type
         //array $authors
-    ): Book {
+    ) {
         $authors_id = [];
-        $changedBook = clone $book;
-
       /*  if(!empty($authors)) {
             array_map(function (Author $author) use ($book) {
                 $book->appendAuthor($author);
@@ -27,16 +25,16 @@ class EditEntityService
         }*/
 
 
-        if (empty($title)) {
-            $changedBook->setTitle($title);
+        if (!empty($title)) {
+            $book->setTitle($title);
         }
 
         if(!empty($description)) {
-            $changedBook->setDescription($description);
+            $book->setDescription($description);
         }
 
         if(!empty($type)) {
-            $changedBook->setType($type);
+            $book->setType($type);
         }
 
       /*  if (!empty($authors_id)) {
@@ -48,6 +46,8 @@ class EditEntityService
 
         }*/
 
-        return $changedBook;
+        //var_dump($book->getTitle());die();
+
+        return $book;
     }
 }
