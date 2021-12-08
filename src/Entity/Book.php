@@ -10,6 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * @ORM\Entity(repositoryClass=BookRepository::class)
  * @ORM\Table(name="`books`")
+ * @ORM\HasLifecycleCallbacks()
  */
 class Book
 {
@@ -46,11 +47,21 @@ class Book
     private $type;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Book", mappedBy="authors")
+     * @ORM\Column(type="datetime", nullable=false)
      */
-    private $books;
+    private $createdAt;
 
-    public function getId(): ?int
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    private $updatedAt;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Author", inversedBy="books")
+     */
+    private $authors;
+
+    public function getId(): int
     {
         return $this->id;
     }
@@ -104,36 +115,66 @@ class Book
     }
 
     /**
-     * @return ArrayCollection|Book[]
+     * @return \DateTime
      */
-    public function getBooks(): ArrayCollection
+    public function getCreatedAt(): \DateTime
     {
-        return $this->books;
+        return $this->createdAt;
     }
 
     /**
-     * @param Book $book
-     * @return Book
+     * @ORM\PrePersist()
      */
-    public function setBook(Book $book): self
+    public function setCreatedAtValue(): void
     {
-        if (!$this->books->contains($book)) {
-            $this->books[] = $book;
-            //$book->addAuthor($this);
+        $this->createdAt = new \DateTime();
+    }
+
+    /**
+     * @return \DateTime|null
+     */
+    public function getUpdatedAt(): ?\DateTime
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * @ORM\PreUpdate()
+     */
+    public function setUpdatedAtValue(): void
+    {
+        $this->updatedAt = new \DateTime();
+    }
+
+    /**
+     * @return ArrayCollection|Author[]
+     */
+    public function getAuthors(): ArrayCollection
+    {
+        return $this->authors;
+    }
+
+    /**
+     * @param Author $author
+     * @return $this
+     */
+    public function appendAuthor(Author $author): self
+    {
+        if (!$this->authors->contains($author)) {
+            $this->authors[] = $author;
         }
 
         return $this;
     }
 
-
     /**
-     * @param Book $book
-     * @return Book
+     * @param Author $author
+     * @return $this
      */
-    public function deleteBook(Book $book): self
+    public function deleteAuthor(Author $author): self
     {
-        if ($this->books->contains($book)) {
-            $this->books->removeElement($book);
+        if ($this->authors->contains($author)) {
+            $this->authors->removeElement($author);
         }
 
         return $this;

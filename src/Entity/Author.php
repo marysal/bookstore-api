@@ -34,10 +34,15 @@ class Author
     private $name;
 
 
-    public function getId(): ?int
+    public function getId(): int
     {
         return $this->id;
     }
+
+    /**
+     * @ORM\ManyToMany(targetEntity="App\Entity\Book", mappedBy="authors")
+     */
+    private $books;
 
     /**
      * @return string
@@ -53,5 +58,39 @@ class Author
     public function setName(string $name): void
     {
         $this->name = $name;
+    }
+
+    /**
+     * @return ArrayCollection|Book[]
+     */
+    public function getBooks(): ArrayCollection
+    {
+        return $this->books;
+    }
+
+    /**
+     * @param Book $book
+     * @return $this
+     */
+    public function appendBook(Book $book): self
+    {
+        if (!$this->books->contains($book)) {
+            $this->books[] = $book;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param Book $book
+     * @return $this
+     */
+    public function deleteBook(Book $book): self
+    {
+        if ($this->books->contains($book)) {
+            $this->books->removeElement($book);
+        }
+
+        return $this;
     }
 }
