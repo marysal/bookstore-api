@@ -3,8 +3,6 @@
 namespace App\Controller\Api;
 
 use App\Entity\Book;
-use App\Form\BookType;
-use App\Repository\AuthorRepository;
 use App\Repository\BookRepository;
 use App\Service\ConvertorService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -55,7 +53,7 @@ class BooksController extends AbstractController
      */
     public function create(Request $request, ValidatorInterface $validator): Response
     {
-        try{
+        try {
             $title = $request->get('title', "");
             $description = $request->get('description', "");
             $type = $request->get('type', "");
@@ -75,14 +73,14 @@ class BooksController extends AbstractController
             $this->entityManager->flush();
 
             $data = [
-                'status' => 200,
+                'status' => Response::HTTP_OK,
                 'success' => "Book added successfully",
             ];
 
         } catch (\Exception $e) {
             $errors = $e->getMessage() ?? "Data no valid";
             $data = [
-                'status' => 422,
+                'status' => Response::HTTP_UNPROCESSABLE_ENTITY,
                 'errors' => $errors
             ];
         } finally {
@@ -95,14 +93,26 @@ class BooksController extends AbstractController
      */
     public function show(int $id, BookRepository $bookRepository): Response
     {
-        $book = $bookRepository->find($id);
+        try {
+            $book = $bookRepository->find($id);
 
-        return $this->json(
-            [
+            if (empty($book)) {
+                throw new \Exception("Book not found");
+            }
+
+            $data =  [
                 'error' => false,
                 'data' => ConvertorService::convertBookObjectToArray($book)
-            ]
-        );
+            ];
+        } catch (\Exception $e) {
+            $errors = $e->getMessage();
+            $data = [
+                'status' => Response::HTTP_NOT_FOUND,
+                'errors' => $errors
+            ];
+        } finally {
+            return $this->json($data);
+        }
     }
 
     /**
