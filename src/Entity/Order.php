@@ -108,9 +108,8 @@ class Order
 
     /**
      * @param Book $book
-     * @return $this
      */
-    public function appendBook(Book $book): self
+    public function appendBookOrderList(Book $book): void
     {
         if (!$this->bookOrderList->contains($book)) {
             $this->bookOrderList[] = $book;
@@ -121,7 +120,7 @@ class Order
      * @param Book $book
      * @return $this
      */
-    public function deleteBook(Book $book): self
+    public function deleteBookOrderList(Book $book): self
     {
         if ($this->bookOrderList->contains($book)) {
             $this->bookOrderList->removeElement($book);

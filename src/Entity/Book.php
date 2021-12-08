@@ -17,7 +17,7 @@ class Book
 
     public function __construct()
     {
-        $this->books = new ArrayCollection();
+        $this->authors = new ArrayCollection();
     }
 
     /**
