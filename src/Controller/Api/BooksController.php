@@ -3,46 +3,106 @@
 namespace App\Controller\Api;
 
 use App\Entity\Book;
+use App\Form\BookType;
+use App\Repository\AuthorRepository;
+use App\Repository\BookRepository;
+use App\Service\ConvertorService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class BooksController extends AbstractController
 {
     /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+
+    /**
+     * @param EntityManagerInterface $manager
+     */
+    public function __construct(EntityManagerInterface $manager)
+    {
+        $this->entityManager = $manager;
+    }
+
+    /**
      * @Route("/api/books", name="app_api_books_list", methods={"GET"})
      */
-    public function list(): Response
+    public function list(Request $request, BookRepository $bookRepository)
     {
-        return $this->json([
-            'message' => 'Здесь будет получение книг'
-        ]);
+        $params = $request->query->all();
+
+        if (empty($params)) {
+            $books = $bookRepository->findAll();
+        } else {
+            $books = $bookRepository->findByFields($params);
+        }
+
+        return $this->json(
+            [
+                'error' => false,
+                'data' => ConvertorService::convertBookObjectToArray($books)
+            ]
+        );
     }
 
     /**
      * @Route("/api/books/create", name="app_api_books_create", methods={"POST"})
      */
-    public function create(): Response
+    public function create(Request $request, ValidatorInterface $validator): Response
     {
-        $book = new Book();
-        $book->setTitle('My first Book');
-        $book->setDescription('My first Book My first Book');
-        $book->setType('prose');
+        try{
+            $title = $request->get('title', "");
+            $description = $request->get('description', "");
+            $type = $request->get('type', "");
 
+            $book = new Book();
+            $book->setTitle($title);
+            $book->setDescription($description);
+            $book->setType($type);
 
-        return $this->json([
-            'message' => 'Здесь будет создание книг'
-        ]);
+            $errors = (string) $validator->validate($book);
+
+             if(!empty($errors)) {
+                throw new \Exception($errors);
+             }
+
+            $this->entityManager->persist($book);
+            $this->entityManager->flush();
+
+            $data = [
+                'status' => 200,
+                'success' => "Book added successfully",
+            ];
+
+        } catch (\Exception $e) {
+            $errors = $e->getMessage() ?? "Data no valid";
+            $data = [
+                'status' => 422,
+                'errors' => $errors
+            ];
+        } finally {
+            return $this->json($data);
+        }
     }
 
     /**
      * @Route("/api/books/{id}", name="app_api_book_show", methods={"GET"})
      */
-    public function show(): Response
+    public function show(int $id, BookRepository $bookRepository): Response
     {
-        return $this->json([
-            'message' => 'Здесь будет поиск книги'
-        ]);
+        $book = $bookRepository->find($id);
+
+        return $this->json(
+            [
+                'error' => false,
+                'data' => ConvertorService::convertBookObjectToArray($book)
+            ]
+        );
     }
 
     /**

@@ -154,6 +154,9 @@
             "config/packages/sensio_framework_extra.yaml"
         ]
     },
+    "symfony-bundles/json-request-bundle": {
+        "version": "v3.1.1"
+    },
     "symfony/cache": {
         "version": "v4.4.35"
     },

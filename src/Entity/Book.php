@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\BookRepository;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -42,7 +43,7 @@ class Book
 
     /**
      * @ORM\Column(type="string", nullable=true)
-     * @Assert\Choice({"prose", "poetry"})
+     * @Assert\Choice({"prose", "poetry"}, message="You can choose 'prose' or 'poetry'")
      */
     private $type;
 
@@ -147,9 +148,9 @@ class Book
     }
 
     /**
-     * @return ArrayCollection|Author[]
+     * @return Collection|Author[]
      */
-    public function getAuthors(): ArrayCollection
+    public function getAuthors(): Collection
     {
         return $this->authors;
     }
