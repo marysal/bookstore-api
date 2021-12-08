@@ -5,6 +5,7 @@ namespace App\Controller\Api;
 use App\Entity\Book;
 use App\Repository\BookRepository;
 use App\Service\ConvertorService;
+use App\Service\EditEntityService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,13 +19,19 @@ class BooksController extends AbstractController
      * @var EntityManagerInterface
      */
     private $entityManager;
+    /**
+     * @var EditEntityService
+     */
+    private $editEntityService;
 
     /**
      * @param EntityManagerInterface $manager
+     * @param EditEntityService $editEntityService
      */
-    public function __construct(EntityManagerInterface $manager)
+    public function __construct(EntityManagerInterface $manager, EditEntityService $editEntityService)
     {
         $this->entityManager = $manager;
+        $this->editEntityService = $editEntityService;
     }
 
     /**
@@ -78,10 +85,9 @@ class BooksController extends AbstractController
             ];
 
         } catch (\Exception $e) {
-            $errors = $e->getMessage() ?? "Data no valid";
             $data = [
                 'status' => Response::HTTP_UNPROCESSABLE_ENTITY,
-                'errors' => $errors
+                'errors' => $e->getMessage()
             ];
         } finally {
             return $this->json($data);
@@ -118,20 +124,76 @@ class BooksController extends AbstractController
     /**
      * @Route("/api/books/{id}", name="app_api_book_update", methods={"PUT"})
      */
-    public function update(): Response
-    {
-        return $this->json([
-            'message' => 'Здесь будет обновление книги'
-        ]);
+    public function update(
+        Request $request,
+        int $id,
+        BookRepository $bookRepository,
+        ValidatorInterface $validator
+    ): Response {
+        try {
+            $book = $bookRepository->find($id);
+            $title = $request->get('title', "");
+            $description = $request->get('description', "");
+            $type = $request->get('type', "");
+            //$authors = $request->get('authors', []);
+            if ($book) {
+                $changedBook = $this->editEntityService->changeBook(
+                    $book,
+                    $title,
+                    $description,
+                    $type
+                //$authors
+                );
+
+                //$this->entityManager->persist($changedBook);
+
+                $errors = (string) $validator->validate($changedBook);
+
+                if(!empty($errors)) {
+                    throw new \Exception($errors);
+                }
+
+                $data = [
+                    'status' => Response::HTTP_OK,
+                ];
+
+            } else {
+                $data = [
+                    'status' => Response::HTTP_NOT_FOUND,
+                    'errors' => "Book not found"
+                ];
+            }
+        } catch (\Exception $e) {
+            $errors = $e->getMessage();
+            $data = [
+                'status' => Response::HTTP_NOT_FOUND,
+                'errors' => $errors
+            ];
+        } finally {
+            return $this->json($data);
+        }
     }
 
     /**
      * @Route("/api/books/{id}", name="app_api_book_destroy", methods={"DELETE"})
      */
-    public function destroy(): Response
+    public function destroy(int $id, BookRepository $bookRepository): Response
     {
-        return $this->json([
-            'message' => 'Здесь будет удаление книги'
-        ]);
+        $book = $bookRepository->find($id);
+        if ($book) {
+            $manager = $this->getDoctrine()->getManager();
+            $manager->remove($book);
+            $manager->flush();
+            $data = [
+                "errors" => false,
+                'message' => 'Deleted'
+            ];
+        } else {
+            $data = [
+                "status" => Response::HTTP_NOT_FOUND,
+                'errors' => 'Book not found'
+            ];
+        }
+        return $this->json($data);
     }
 }
