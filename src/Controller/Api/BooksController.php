@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api;
 
+use App\Entity\Author;
 use App\Entity\Book;
 use App\Repository\BookRepository;
 use App\Service\ConvertorService;
@@ -64,11 +65,25 @@ class BooksController extends AbstractController
             $title = $request->get('title', "");
             $description = $request->get('description', "");
             $type = $request->get('type', "");
+            $authors = $request->get('authors', "");
+
+
+
 
             $book = new Book();
             $book->setTitle($title);
             $book->setDescription($description);
             $book->setType($type);
+
+            foreach ($authors as $nameAuthor) {
+                $author = new Author();
+                $author->setName($nameAuthor);
+                $book->appendAuthor($author);
+                $errors = (string) $validator->validate($author);
+                if(!empty($errors)) {
+                    throw new \Exception($errors);
+                }
+            }
 
             $errors = (string) $validator->validate($book);
 

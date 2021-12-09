@@ -58,7 +58,7 @@ class Book
     private $updatedAt;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Entity\Author", inversedBy="books")
+     * @ORM\ManyToMany(targetEntity="App\Entity\Author", inversedBy="books", cascade={"persist"})
      */
     private $authors;
 
