@@ -12,6 +12,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class BooksController extends AbstractController
@@ -20,55 +22,85 @@ class BooksController extends AbstractController
      * @var EntityManagerInterface
      */
     private $entityManager;
+
     /**
      * @var EditEntityService
      */
     private $editEntityService;
 
     /**
+     * @var Serializer
+     */
+    private $serializer;
+
+    /**
+     * @var BookRepository
+     */
+    private $bookRepository;
+
+    /**
+     * @var ValidatorInterface
+     */
+    private $validator;
+
+    /**
+     * @param BookRepository $bookRepository
      * @param EntityManagerInterface $manager
      * @param EditEntityService $editEntityService
+     * @param Serializer $serializer
+     * @param ValidatorInterface $validator
      */
-    public function __construct(EntityManagerInterface $manager, EditEntityService $editEntityService)
-    {
+    public function __construct(
+        BookRepository $bookRepository,
+        EntityManagerInterface $manager,
+        EditEntityService $editEntityService,
+        SerializerInterface $serializer,
+        ValidatorInterface $validator
+    ) {
         $this->entityManager = $manager;
         $this->editEntityService = $editEntityService;
+        $this->serializer = $serializer;
+        $this->bookRepository = $bookRepository;
+        $this->validator = $validator;
     }
 
     /**
      * @Route("/api/books", name="app_api_books_list", methods={"GET"})
      */
-    public function list(Request $request, BookRepository $bookRepository)
+    public function list(Request $request)
     {
         $params = $request->query->all();
 
-        if (empty($params)) {
-            $books = $bookRepository->findAll();
-        } else {
-            $books = $bookRepository->findByFields($params);
-        }
+        $books = $this->bookRepository->findByFields($params);
 
-        return $this->json(
+        $jsonContent = $this->serializer->serialize(
             [
                 'error' => false,
-                'data' => ConvertorService::convertBookObjectToArray($books)
+                'data' => $books
+            ],
+     'json',
+            [
+                'groups' => [
+                    'book',
+                    'author',
+                    'author_detail' /* if you add "book_detail" here you get circular reference */
+                ]
             ]
         );
+
+        return $this->json($jsonContent);
     }
 
     /**
      * @Route("/api/books/create", name="app_api_books_create", methods={"POST"})
      */
-    public function create(Request $request, ValidatorInterface $validator): Response
+    public function create(Request $request): Response
     {
         try {
             $title = $request->get('title', "");
             $description = $request->get('description', "");
             $type = $request->get('type', "");
             $authors = $request->get('authors', "");
-
-
-
 
             $book = new Book();
             $book->setTitle($title);
@@ -79,13 +111,13 @@ class BooksController extends AbstractController
                 $author = new Author();
                 $author->setName($nameAuthor);
                 $book->appendAuthor($author);
-                $errors = (string) $validator->validate($author);
+                $errors = (string) $this->validator->validate($author);
                 if(!empty($errors)) {
                     throw new \Exception($errors);
                 }
             }
 
-            $errors = (string) $validator->validate($book);
+            $errors = (string) $this->validator->validate($book);
 
              if(!empty($errors)) {
                 throw new \Exception($errors);
@@ -112,10 +144,10 @@ class BooksController extends AbstractController
     /**
      * @Route("/api/books/{id}", name="app_api_book_show", methods={"GET"})
      */
-    public function show(int $id, BookRepository $bookRepository): Response
+    public function show(int $id): Response
     {
         try {
-            $book = $bookRepository->find($id);
+            $book = $this->bookRepository->find($id);
 
             if (empty($book)) {
                 throw new \Exception("Book not found");
@@ -139,14 +171,10 @@ class BooksController extends AbstractController
     /**
      * @Route("/api/books/{id}", name="app_api_book_update", methods={"PUT"})
      */
-    public function update(
-        Request $request,
-        int $id,
-        BookRepository $bookRepository,
-        ValidatorInterface $validator
-    ): Response {
+    public function update(Request $request, int $id): Response
+    {
         try {
-            $book = $bookRepository->find($id);
+            $book = $this->bookRepository->find($id);
             //$title = $request->get('title', "");
             //$description = $request->get('description', "");
             //$type = $request->get('type', "");
@@ -172,7 +200,7 @@ class BooksController extends AbstractController
                     $book->setType($request->get('type', ""));
                 }
 
-                $errors = (string) $validator->validate($book);
+                $errors = (string) $this->validator->validate($book);
 
                 $this->entityManager->persist($book);
                 $this->entityManager->flush();
@@ -205,9 +233,9 @@ class BooksController extends AbstractController
     /**
      * @Route("/api/books/{id}", name="app_api_book_destroy", methods={"DELETE"})
      */
-    public function destroy(int $id, BookRepository $bookRepository): Response
+    public function destroy(int $id): Response
     {
-        $book = $bookRepository->find($id);
+        $book = $this->bookRepository->find($id);
         if ($book) {
             $manager = $this->getDoctrine()->getManager();
             $manager->remove($book);

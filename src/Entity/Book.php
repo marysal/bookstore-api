@@ -6,6 +6,7 @@ use App\Repository\BookRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -22,6 +23,7 @@ class Book
     }
 
     /**
+     * @Groups("book")
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
@@ -29,6 +31,7 @@ class Book
     private $id;
 
     /**
+     * @Groups("book")
      * @ORM\Column(type="string", length=255, nullable=false)
      * @Assert\NotBlank()
      * @Assert\Length(min=5, max=255)
@@ -36,28 +39,33 @@ class Book
     private $title;
 
     /**
+     * @Groups("book")
      * @ORM\Column(type="text", nullable=true)
      * @Assert\Length(max=255)
      */
     private $description;
 
     /**
+     * @Groups("book")
      * @ORM\Column(type="string", nullable=true)
      * @Assert\Choice({"prose", "poetry"}, message="You can choose 'prose' or 'poetry'")
      */
     private $type;
 
     /**
+     * @Groups("book")
      * @ORM\Column(type="datetime", nullable=false)
      */
     private $createdAt;
 
     /**
+     * @Groups("book")
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $updatedAt;
 
     /**
+     * @Groups("author_detail")
      * @ORM\ManyToMany(targetEntity="App\Entity\Author", inversedBy="books", cascade={"persist"})
      */
     private $authors;
