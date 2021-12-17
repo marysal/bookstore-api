@@ -64,6 +64,7 @@ class BooksController extends AbstractController
         $this->validator = $validator;
     }
 
+
     /**
      * @Route("/api/books", name="app_api_books_list", methods={"GET"})
      */
@@ -96,49 +97,67 @@ class BooksController extends AbstractController
      */
     public function create(Request $request): Response
     {
-        try {
+        #try {
             $title = $request->get('title', "");
             $description = $request->get('description', "");
             $type = $request->get('type', "");
             $authors = $request->get('authors', "");
+
 
             $book = new Book();
             $book->setTitle($title);
             $book->setDescription($description);
             $book->setType($type);
 
-            foreach ($authors as $nameAuthor) {
-                $author = new Author();
-                $author->setName($nameAuthor);
-                $book->appendAuthor($author);
-                $errors = (string) $this->validator->validate($author);
-                if(!empty($errors)) {
-                    throw new \Exception($errors);
+
+            foreach ($authors as $authorId) {
+                $authorId = (int) $authorId;
+                $author = $this->entityManager->find(Author::class, $authorId);
+                if (empty($author)) {
+                    throw $this->createNotFoundException('Author with this ID not found');
                 }
+                $book->appendAuthor($author);
             }
 
             $errors = (string) $this->validator->validate($book);
 
+
              if(!empty($errors)) {
-                throw new \Exception($errors);
+                throw $this->createNotFoundException($errors);
              }
 
             $this->entityManager->persist($book);
             $this->entityManager->flush();
 
-            $data = [
-                'status' => Response::HTTP_OK,
-                'success' => "Book added successfully",
-            ];
+            //return $this->json($book);
 
-        } catch (\Exception $e) {
-            $data = [
-                'status' => Response::HTTP_UNPROCESSABLE_ENTITY,
-                'errors' => $e->getMessage()
-            ];
-        } finally {
-            return $this->json($data);
-        }
+            $jsonContent = $this->serializer->serialize(
+                [
+                    'status' => Response::HTTP_CREATED,
+                    'data' => $book
+                ],
+                'json',
+                [
+                    'groups' => [
+                        'book',
+                        'author',
+                        'author_detail' /* if you add "book_detail" here you get circular reference */
+                    ]
+                ]
+            );
+
+        #} catch (\Exception $e) {
+            /*$jsonContent = $this->serializer->serialize(
+                [
+                    'status' => Response::HTTP_UNPROCESSABLE_ENTITY,
+                    'errors' => $e->getMessage()
+                ],
+                'json'
+            );*/
+        #} finally {
+
+        #}
+        return $this->json($jsonContent);
     }
 
     /**

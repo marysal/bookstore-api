@@ -1,5 +1,6 @@
 # see https://symfony.com/doc/current/reference/configuration/framework.html
 framework:
+    error_controller: App\Controller\JsonErrorController::show
     secret: '%env(APP_SECRET)%'
     validation: { enable_annotations: true }
     #csrf_protection: true
