@@ -19,32 +19,26 @@ class OrderRepository extends ServiceEntityRepository
         parent::__construct($registry, Order::class);
     }
 
-    // /**
-    //  * @return Order[] Returns an array of Order objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    /**
+     * @param array $params
+     * @return Order Returns an array of Order objects
+     */
+    public function findByFields(array $params)
     {
-        return $this->createQueryBuilder('o')
-            ->andWhere('o.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('o.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
+        $query = $this->createQueryBuilder('b');
 
-    /*
-    public function findOneBySomeField($value): ?Order
-    {
-        return $this->createQueryBuilder('o')
-            ->andWhere('o.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        if(isset($params['phone'])) {
+            $query->andWhere('b.phone LIKE :phone')->setParameter('phone', $params['phone']);
+        }
+
+        if(isset($params['address'])) {
+            $query->andWhere('b.address LIKE :address')->setParameter('address', $params['address']);
+        }
+
+        if(isset($params['status'])) {
+            $query->andWhere('b.status LIKE :status')->setParameter('status', $params['status']);
+        }
+
+        return $query->getQuery()->execute();
     }
-    */
 }

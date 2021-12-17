@@ -2,10 +2,13 @@
 
 namespace App\Entity;
 
+use App\Enum\StatusesOrdersEnum;
 use App\Repository\OrderRepository;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Validator as CustomAssert;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 
@@ -22,6 +25,7 @@ class Order
     }
 
     /**
+     * @Groups("order")
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
@@ -29,34 +33,42 @@ class Order
     private $id;
 
     /**
+     * @Groups("order")
      * @ORM\Column(type="string", length=20, nullable=false)
      * @CustomAssert\PhoneConstraint()
      */
     private $phone;
 
     /**
+     * @Groups("order")
+     * @Groups("book")
      * @ORM\Column(type="string", length=255, nullable=false)
+     * @Assert\NotBlank
      * @Assert\Length(min=5, max=255)
      */
     private $address;
 
     /**
-     * @ORM\Column(type="string", length=15, nullable=false)
+     * @Groups("order")
+     * @ORM\Column(type="string", length=15)
      * @Assert\Choice({"pending", "processed", "delivered"})
      */
     private $status;
 
     /**
+     * @Groups("order")
      * @ORM\Column(type="datetime", nullable=false)
      */
     private $createdAt;
 
     /**
+     * @Groups("order")
      * @ORM\Column(type="datetime", nullable=true)
      */
     private $updatedAt;
 
     /**
+     * @Groups("book_order")
      * @ORM\ManyToMany(targetEntity="App\Entity\Book")
      */
     private $bookOrderList;
@@ -99,9 +111,9 @@ class Order
     }
 
     /**
-     * @return ArrayCollection|Book[]
+     * @return Collection|Book[]
      */
-    public function getBookOrderList(): ArrayCollection
+    public function getBookOrderList(): Collection
     {
         return $this->bookOrderList;
     }
@@ -167,6 +179,14 @@ class Order
     public function getStatus(): string
     {
         return $this->status;
+    }
+
+    /**
+     * @ORM\PrePersist()
+     */
+    public function setStatusValue(): void
+    {
+        $this->status = StatusesOrdersEnum::STATUS_PENDING;
     }
 
     /**

@@ -22,7 +22,7 @@ class AuthorRepository extends ServiceEntityRepository
 
     /**
      * @param array $params
-     * @return Book Returns an array of Book objects
+     * @return Author Returns an array of Author objects
      */
     public function findByFields(array $params)
     {

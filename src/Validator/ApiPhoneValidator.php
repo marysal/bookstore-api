@@ -8,10 +8,6 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class ApiPhoneValidator extends ConstraintValidator
 {
-    #private const NUM_VERIFY_API_URL = "http://apilayer.net/api/validate";
-
-    #private const NUM_VERIFY_API_KEY = "d16d7006aff743dc2cd293c3a4c44be0";
-
     /**
      * @var HttpClientInterface
      */
@@ -41,10 +37,11 @@ class ApiPhoneValidator extends ConstraintValidator
             );
 
             $data = $response->toArray();
+
             if (empty($data['valid'])) {
                 /** @var PhoneConstraint $constraint */
                 $this->context->buildViolation($constraint->message)
-                    ->setParameter('{{phone}}', $phone)
+                    ->setParameter('phone', $phone)
                     ->addViolation();
             }
         }
