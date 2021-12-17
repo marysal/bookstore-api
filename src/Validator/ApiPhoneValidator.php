@@ -18,9 +18,8 @@ class ApiPhoneValidator extends ConstraintValidator
         $this->client = $client;
     }
 
-    public function validate($value, Constraint $constraint)
+    public function validate($phone, Constraint $constraint)
     {
-        $phone = preg_replace('/[^0-9]/', '', $value);
         if(empty($phone)) {
             $this->context->addViolation("Phone can not be empty");
         } else {
