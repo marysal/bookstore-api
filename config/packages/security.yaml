@@ -46,4 +46,6 @@ security:
       - { path: ^/api/books, roles: ROLE_ADMIN }
       - { path: ^/api/order$, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [ POST ] }
       - { path: ^/api/order$, roles: ROLE_ADMIN, methods: [ GET ] }
+      - { path: ^/api/authors, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [ GET ] }
+      - { path: ^/api/authors, roles: ROLE_ADMIN }
 

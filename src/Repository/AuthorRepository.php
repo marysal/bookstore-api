@@ -21,6 +21,18 @@ class AuthorRepository extends ServiceEntityRepository
     }
 
     /**
+     * @return Author Returns author
+     */
+    public function findOne()
+    {
+        $query = $this->createQueryBuilder('b');
+
+        $query->setMaxResults(1);
+
+        return $query->getQuery()->execute();
+    }
+
+    /**
      * @param array $params
      * @return Author Returns an array of Author objects
      */
