@@ -123,6 +123,33 @@ class AuthorControllerTest extends WebTestCase
         $this->assertSame("Fyodor Dostoevsky New", $changedContent['data']['name']);
     }
 
+    public function testDestroy()
+    {
+        $client = static::createClient([]);
+
+        $client->request(
+            "POST",
+            "/api/authors/create",
+            ['name' => "Fyodor Dostoevsky"],
+            [],
+            self::$header
+        );
+
+        $content = json_decode(json_decode($client->getResponse()->getContent()), true);
+
+        $this->assertSame(Response::HTTP_CREATED, $client->getResponse()->getStatusCode());
+
+        $client->request(
+            "DELETE",
+            "/api/authors/{$content['data']['id']}",
+            [],
+            [],
+            self::$header
+        );
+
+        $this->assertSame(Response::HTTP_OK, $client->getResponse()->getStatusCode());
+    }
+
     private static function setToken(): void
     {
         $client = static::createClient([]);

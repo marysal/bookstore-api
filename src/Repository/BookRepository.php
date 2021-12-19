@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Author;
 use App\Entity\Book;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -19,6 +20,17 @@ class BookRepository extends ServiceEntityRepository
         parent::__construct($registry, Book::class);
     }
 
+    /**
+     * @return Book Returns book
+     */
+    public function findOne()
+    {
+        $query = $this->createQueryBuilder('b');
+
+        $query->setMaxResults(1);
+
+        return $query->getQuery()->execute();
+    }
 
     /**
      * @param array $params
