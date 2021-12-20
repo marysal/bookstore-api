@@ -6,6 +6,8 @@ use App\Entity\Author;
 use App\Entity\Book;
 use App\Repository\BookRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\Paginator;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -58,11 +60,20 @@ class BooksController extends AbstractController
     /**
      * @Route("/api/books", name="app_api_books_list", methods={"GET"})
      */
-    public function list(Request $request)
+    public function list(Request $request, PaginatorInterface $paginator)
     {
         $params = $request->query->all();
 
-        $books = $this->bookRepository->findByFields($params);
+        $booksQuery = $this->bookRepository->findByFields($params);
+
+        $books = $paginator->paginate(
+            // Doctrine Query, not results
+            $booksQuery,
+            // Define the page parameter
+            $request->query->getInt('page', 1),
+            // Items per page
+            3
+        );
 
         $jsonContent = $this->serializer->serialize(
             [

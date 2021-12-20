@@ -52,7 +52,8 @@ class BookRepository extends ServiceEntityRepository
             $query->andWhere('b.type LIKE :type')->setParameter('type', $params['type']);
         }
 
-        return $query->getQuery()->execute();
+        //return $query->getQuery()->execute();
+        return $query->getQuery();
     }
 
 }
