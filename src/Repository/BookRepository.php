@@ -2,10 +2,10 @@
 
 namespace App\Repository;
 
-use App\Entity\Author;
 use App\Entity\Book;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\Query;
 
 /**
  * @method Book|null find($id, $lockMode = null, $lockVersion = null)
@@ -34,9 +34,9 @@ class BookRepository extends ServiceEntityRepository
 
     /**
      * @param array $params
-     * @return Book Returns an array of Book objects
+     * @return Query Returns an array of Book objects
      */
-    public function findByFields(array $params)
+    public function findByFields(array $params): Query
     {
         $query = $this->createQueryBuilder('b');
 

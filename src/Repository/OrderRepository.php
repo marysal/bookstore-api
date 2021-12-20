@@ -20,6 +20,18 @@ class OrderRepository extends ServiceEntityRepository
     }
 
     /**
+     * @return Order Returns book
+     */
+    public function findOne()
+    {
+        $query = $this->createQueryBuilder('b');
+
+        $query->setMaxResults(1);
+
+        return $query->getQuery()->execute();
+    }
+
+    /**
      * @param array $params
      * @return Order Returns an array of Order objects
      */

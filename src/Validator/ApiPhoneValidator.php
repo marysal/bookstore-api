@@ -43,6 +43,7 @@ class ApiPhoneValidator extends ConstraintValidator
                     ->setParameter('phone', $phone)
                     ->addViolation();
             }
+
         }
     }
 }
