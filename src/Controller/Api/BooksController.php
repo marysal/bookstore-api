@@ -63,21 +63,10 @@ class BooksController extends BaseController
         $this->entityManager->persist($book);
         $this->entityManager->flush();
 
-        $jsonContent = $this->serializer->serialize(
-            [
-                'data' => $book
-            ],
-     'json',
-            [
-                'groups' => [
-                    'book',
-                    'author',
-                    'author_detail' /* if you add "book_detail" here you get circular reference */
-                ]
-            ]
+        return $this->json(
+            $this->getJsonContent($book),
+      Response::HTTP_CREATED
         );
-
-        return $this->json($jsonContent, Response::HTTP_CREATED);
     }
 
     /**

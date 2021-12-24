@@ -75,4 +75,21 @@ class BaseController extends AbstractController
         $this->orderRepository = $orderRepository;
         $this->paginator = $paginator;
     }
+
+    protected function getJsonContent(\StoreInterface $data): string
+    {
+        return $this->serializer->serialize(
+            [
+                'data' => $data
+            ],
+            'json',
+            [
+                'groups' => [
+                    'book',
+                    'author',
+                    'author_detail' /* if you add "book_detail" here you get circular reference */
+                ]
+            ]
+        );
+    }
 }
