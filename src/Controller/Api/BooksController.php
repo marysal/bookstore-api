@@ -4,63 +4,13 @@ namespace App\Controller\Api;
 
 use App\Entity\Author;
 use App\Entity\Book;
-use App\Repository\BookRepository;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\Entity;
-use Knp\Component\Pager\Paginator;
 use Knp\Component\Pager\PaginatorInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\Serializer;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class BooksController extends AbstractController
+class BooksController extends BaseController
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
-
-    /**
-     * @var Serializer
-     */
-    private $serializer;
-
-    /**
-     * @var BookRepository
-     */
-    private $bookRepository;
-
-    /**
-     * @var ValidatorInterface
-     */
-    private $validator;
-
-    /**
-     * @param BookRepository $bookRepository
-     * @param EntityManagerInterface $manager
-     * @param Serializer $serializer
-     * @param ValidatorInterface $validator
-     */
-    public function __construct(
-        BookRepository $bookRepository,
-        EntityManagerInterface $manager,
-        SerializerInterface $serializer,
-        ValidatorInterface $validator
-    ) {
-        $this->entityManager = $manager;
-        $this->serializer = $serializer;
-        $this->bookRepository = $bookRepository;
-        $this->validator = $validator;
-    }
-
-
     /**
      * @Route("/api/books", name="app_api_books_list", methods={"GET"})
      */

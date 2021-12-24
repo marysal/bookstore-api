@@ -4,55 +4,12 @@ namespace App\Controller\Api;
 
 use App\Entity\Book;
 use App\Entity\Order;
-use App\Repository\OrderRepository;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\Serializer;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class OrdersController extends AbstractController
+class OrdersController extends BaseController
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
-
-    /**
-     * @var Serializer
-     */
-    private $serializer;
-
-    /**
-     * @var OrderRepository
-     */
-    private $orderRepository;
-
-    /**
-     * @var ValidatorInterface
-     */
-    private $validator;
-
-    /**
-     * @param EntityManagerInterface $manager
-     * @param Serializer $serializer
-     * @param ValidatorInterface $validator
-     */
-    public function __construct(
-        EntityManagerInterface $manager,
-        SerializerInterface $serializer,
-        ValidatorInterface $validator,
-        OrderRepository $orderRepository
-    ) {
-        $this->entityManager = $manager;
-        $this->serializer = $serializer;
-        $this->orderRepository = $orderRepository;
-        $this->validator = $validator;
-    }
-
     /**
      * @Route("/api/orders", name="app_api_orders_list", methods={"GET"})
      */
