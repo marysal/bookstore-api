@@ -4,7 +4,6 @@ namespace App\Controller\Api;
 
 use App\Entity\Author;
 use App\Entity\Book;
-use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -14,11 +13,11 @@ class BooksController extends BaseController
     /**
      * @Route("/api/books", name="app_api_books_list", methods={"GET"})
      */
-    public function list(Request $request, PaginatorInterface $paginator)
+    public function list(Request $request)
     {
         $params = $request->query->all();
 
-        $booksQuery = $this->bookRepository->findByFields($params);
+        $booksQuery = $this->bookRepository->getQueryByFields($params);
 
         $jsonContent = $this->serializer->serialize(
             [

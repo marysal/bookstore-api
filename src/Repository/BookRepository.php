@@ -36,7 +36,7 @@ class BookRepository extends ServiceEntityRepository
      * @param array $params
      * @return Query Returns an array of Book objects
      */
-    public function findByFields(array $params): Query
+    public function getQueryByFields(array $params): Query
     {
         $query = $this->createQueryBuilder('b');
 
@@ -52,7 +52,6 @@ class BookRepository extends ServiceEntityRepository
             $query->andWhere('b.type LIKE :type')->setParameter('type', $params['type']);
         }
 
-        //return $query->getQuery()->execute();
         return $query->getQuery();
     }
 
