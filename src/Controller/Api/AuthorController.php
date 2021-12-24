@@ -91,10 +91,10 @@ class AuthorController extends AbstractController
         $author = new Author();
         $author->setName($name);
 
-        $errors = (string) $this->validator->validate($author);
+        $errors = $this->validator->validate($author);
 
         if(!empty($errors)) {
-            throw $this->createNotFoundException($errors);
+            throw $this->createNotFoundException($errors->get(0)->getMessage());
         }
 
         $this->entityManager->persist($author);

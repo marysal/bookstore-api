@@ -6,12 +6,16 @@ use App\Entity\Author;
 use App\Entity\Book;
 use App\Repository\BookRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Mapping\Entity;
 use Knp\Component\Pager\Paginator;
 use Knp\Component\Pager\PaginatorInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -97,56 +101,56 @@ class BooksController extends AbstractController
      */
     public function create(Request $request): Response
     {
-            $title = $request->get('title', "");
-            $description = $request->get('description', "");
-            $type = $request->get('type', "");
-            $authors = $request->get('authors', []);
+        $book = $this->serializer->deserialize($request->getContent(), Book::class, 'json');
+        $authors = $request->get('authors', []);
 
-            $book = new Book();
-            $book->setTitle($title);
-            $book->setDescription($description);
-            $book->setType($type);
-
-            foreach ($authors as $authorId) {
-                $authorId = (int) $authorId;
-                $author = $this->entityManager->find(Author::class, $authorId);
-                if (empty($author)) {
-                    throw $this->createNotFoundException('Author with this ID not found');
-                }
-                $book->appendAuthor($author);
+        foreach ($authors as $authorId) {
+            $authorId = (int) $authorId;
+            $author = $this->entityManager->find(Author::class, $authorId);
+            if (empty($author)) {
+                throw $this->createNotFoundException('Author with this ID not found');
             }
+            $book->appendAuthor($author);
+        }
 
-            $errors = (string) $this->validator->validate($book);
+        $errors = (string) $this->validator->validate($book);
 
-            if(!empty($errors)) {
-                throw $this->createNotFoundException($errors);
-            }
+        if(!empty($errors)) {
+            throw $this->createNotFoundException($errors);
+        }
 
-            $this->entityManager->persist($book);
-            $this->entityManager->flush();
+        $this->entityManager->persist($book);
+        $this->entityManager->flush();
 
-            $jsonContent = $this->serializer->serialize(
-                [
-                    'data' => $book
-                ],
-         'json',
-                [
-                    'groups' => [
-                        'book',
-                        'author',
-                        'author_detail' /* if you add "book_detail" here you get circular reference */
-                    ]
+        $jsonContent = $this->serializer->serialize(
+            [
+                'data' => $book
+            ],
+     'json',
+            [
+                'groups' => [
+                    'book',
+                    'author',
+                    'author_detail' /* if you add "book_detail" here you get circular reference */
                 ]
-            );
+            ]
+        );
 
         return $this->json($jsonContent, Response::HTTP_CREATED);
     }
 
     /**
+     *
      * @Route("/api/books/{id}", name="app_api_book_show", methods={"GET"})
      */
     public function show(Book $book): Response
     {
+        //var_dump($book);die();
+
+        if (!$book) {
+            throw $this->createNotFoundException('The product does not exist');
+        }
+
         $jsonContent = $this->serializer->serialize(
             [
                 'data' => $book
