@@ -1,9 +1,10 @@
 <?php
-namespace AppBundle\Request\ParamConverter;
+
+namespace App\AppBundle\Request\ParamConverter;
 
 use App\Entity\Author;
 use App\Entity\Order;
-use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Request\ParamConverter\ParamConverterInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
@@ -14,7 +15,7 @@ class IdConverter implements ParamConverterInterface
 {
     protected $em;
 
-    public function __construct(EntityManager $em)
+    public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
     }

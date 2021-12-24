@@ -20,18 +20,9 @@ class BooksController extends BaseController
 
         $booksQuery = $this->bookRepository->findByFields($params);
 
-        $books = $paginator->paginate(
-            // Doctrine Query, not results
-            $booksQuery,
-            // Define the page parameter
-            $request->query->getInt('page', 1),
-            // Items per page
-            3
-        );
-
         $jsonContent = $this->serializer->serialize(
             [
-                'data' => $books
+                'data' => $this->paginator->getPaginate($booksQuery)
             ],
      'json',
             [

@@ -10,12 +10,13 @@ parameters:
 services:
     # default configuration for services in *this* file
     id_converter:
-        class: AppBundle\Request\ParamConverter\IdConverter
+        class: App\AppBundle\Request\ParamConverter\IdConverter
         arguments:
             - "@doctrine.orm.default_entity_manager"
             - "@security.token_storage"
         tags:
             - { name: request.param_converter, priority: 1, converter: id_converter}
+
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
@@ -35,3 +36,7 @@ services:
     App\Controller\:
         resource: '../src/Controller/'
         tags: ['controller.service_arguments']
+
+    App\Service\PaginatorService:
+        arguments:
+            $paginator: "@knp_paginator"

@@ -5,6 +5,7 @@ namespace App\Controller\Api;
 use App\Repository\AuthorRepository;
 use App\Repository\BookRepository;
 use App\Repository\OrderRepository;
+use App\Service\PaginatorService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Serializer\Serializer;
@@ -44,12 +45,18 @@ class BaseController extends AbstractController
     protected $orderRepository;
 
     /**
+     * @var PaginatorService
+     */
+    protected $paginator;
+
+    /**
      * @param BookRepository $bookRepository
      * @param AuthorRepository $authorRepository
      * @param OrderRepository $orderRepository
      * @param EntityManagerInterface $manager
      * @param Serializer $serializer
      * @param ValidatorInterface $validator
+     * @param PaginatorService $paginator
      */
     public function __construct(
         BookRepository $bookRepository,
@@ -57,7 +64,8 @@ class BaseController extends AbstractController
         OrderRepository $orderRepository,
         EntityManagerInterface $manager,
         SerializerInterface $serializer,
-        ValidatorInterface $validator
+        ValidatorInterface $validator,
+        PaginatorService $paginator
     ) {
         $this->entityManager = $manager;
         $this->serializer = $serializer;
@@ -65,5 +73,6 @@ class BaseController extends AbstractController
         $this->validator = $validator;
         $this->authorRepository = $authorRepository;
         $this->orderRepository = $orderRepository;
+        $this->paginator = $paginator;
     }
 }
