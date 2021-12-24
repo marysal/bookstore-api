@@ -2,6 +2,8 @@
 
 namespace App\Validator;
 
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -15,6 +17,13 @@ class ApiPhoneValidator extends ConstraintValidator
 
     public function __construct(HttpClientInterface $client)
     {
+        if(empty($_ENV['NUM_VERIFY_API_URL']) || $_ENV['NUM_VERIFY_API_KEY']) {
+            throw new HttpException(
+               Response::HTTP_UNPROCESSABLE_ENTITY,
+                "There is no url or key to connect to numverify api"
+            );
+        }
+
         $this->client = $client;
     }
 

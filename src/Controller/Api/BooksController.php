@@ -6,6 +6,7 @@ use App\Entity\Author;
 use App\Entity\Book;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 class BooksController extends BaseController
@@ -85,8 +86,6 @@ class BooksController extends BaseController
      */
     public function show(Book $book): Response
     {
-        //var_dump($book);die();
-
         if (!$book) {
             throw $this->createNotFoundException('The product does not exist');
         }
