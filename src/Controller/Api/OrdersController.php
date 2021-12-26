@@ -4,6 +4,7 @@ namespace App\Controller\Api;
 
 use App\Entity\Book;
 use App\Entity\Order;
+use App\Enum\EntityGroupsEnum;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -19,21 +20,9 @@ class OrdersController extends BaseController
 
         $orders = $this->orderRepository->findByFields($params);
 
-        $jsonContent = $this->serializer->serialize(
-            [
-                'data' => $orders
-            ],
-            'json',
-            [
-                'groups' => [
-                    'order',
-                    'book',
-                    'book_order'
-                ]
-            ]
+        return $this->json(
+            $this->getJsonContent($orders, EntityGroupsEnum::ENTITY_ORDERS)
         );
-
-        return $this->json($jsonContent);
     }
 
     /**
@@ -41,51 +30,31 @@ class OrdersController extends BaseController
      */
     public function create(Request $request): Response
     {
-        $phone = $request->get('phone', "");
-        $address = $request->get('address', "");
+        $order = $this->serializer->deserialize($request->getContent(), Order::class, 'json');
         $books = $request->get('books', []);
 
-        $order = new Order();
-        $order->setPhone($phone);
-        $order->setAddress($address);
+        $this->validate($books);
 
-        if(empty($books)) {
+       /* if(empty($books)) {
             throw $this->createNotFoundException('The order must contain at least one book ID');
-        }
+        }*/
 
         foreach ($books as $bookId) {
             $bookId = (int) $bookId;
             $book = $this->entityManager->find(Book::class, $bookId);
-            if (empty($book)) {
-                throw $this->createNotFoundException('Book with this ID not found');
-            }
+            $this->validate($book);
             $order->appendBookOrderList($book);
         }
 
-        $errors = (string) $this->validator->validate($order);
-
-        if(!empty($errors)) {
-            throw $this->createNotFoundException($errors);
-        }
+        $this->validate($order);
 
         $this->entityManager->persist($order);
         $this->entityManager->flush();
 
-        $jsonContent = $this->serializer->serialize(
-            [
-                'data' => $order
-            ],
-            'json',
-            [
-                'groups' => [
-                    'order',
-                    'book',
-                    'book_order'
-                ]
-            ]
+        return $this->json(
+            $this->getJsonContent($order, EntityGroupsEnum::ENTITY_ORDERS),
+            Response::HTTP_CREATED
         );
-
-        return $this->json($jsonContent, Response::HTTP_CREATED);
     }
 
     /**
@@ -93,21 +62,9 @@ class OrdersController extends BaseController
      */
     public function show(Order $order): Response
     {
-        $jsonContent = $this->serializer->serialize(
-            [
-                'data' => $order
-            ],
-            'json',
-            [
-                'groups' => [
-                    'order',
-                    'book',
-                    'book_order'
-                ]
-            ]
+        return $this->json(
+            $this->getJsonContent($order)
         );
-
-        return $this->json($jsonContent);
     }
 
     /**
@@ -121,40 +78,27 @@ class OrdersController extends BaseController
         $order->setAddress($request->get('address', ""));
         $order->setStatus($request->get('status', ""));
 
-        if(empty($books)) {
+        $this->validate($books);
+
+       /* if(empty($books)) {
             throw $this->createNotFoundException('The order must contain at least one book ID');
-        }
+        }*/
 
         foreach ($books as $bookId) {
             $bookId = (int) $bookId;
             $book = $this->entityManager->find(Book::class, $bookId);
+            $this->validate($book);
             $order->appendBookOrderList($book);
         }
 
-        $errors = (string) $this->validator->validate($order);
-
-        if(!empty($errors)) {
-            throw $this->createNotFoundException($errors);
-        }
+        $this->validate($order);
 
         $this->entityManager->persist($order);
         $this->entityManager->flush();
 
-        $jsonContent = $this->serializer->serialize(
-            [
-                'data' => $order
-            ],
-            'json',
-            [
-                'groups' => [
-                    'order',
-                    'book',
-                    'book_order'
-                ]
-            ]
+        return $this->json(
+            $this->getJsonContent($order, EntityGroupsEnum::ENTITY_ORDERS)
         );
-
-        return $this->json($jsonContent);
     }
 
     /**
@@ -165,13 +109,9 @@ class OrdersController extends BaseController
         $manager = $this->getDoctrine()->getManager();
         $manager->remove($order);
         $manager->flush();
-        $data = [
-            "errors" => false,
-            'message' => 'Deleted'
-        ];
 
-        $jsonContent = $this->serializer->serialize($data, 'json');
-
-        return $this->json($jsonContent);
+        return $this->json(
+            $this->getJsonContent([], EntityGroupsEnum::ENTITY_DELETED)
+        );
     }
 }

@@ -4,9 +4,9 @@ namespace App\Controller\Api;
 
 use App\Entity\Author;
 use App\Entity\Book;
+use App\Enum\EntityGroupsEnum;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 class BooksController extends BaseController
@@ -20,21 +20,11 @@ class BooksController extends BaseController
 
         $booksQuery = $this->bookRepository->getQueryByFields($params);
 
-        $jsonContent = $this->serializer->serialize(
-            [
-                'data' => $this->paginator->getPaginate($booksQuery)
-            ],
-     'json',
-            [
-                'groups' => [
-                    'book',
-                    'author',
-                    'author_detail' /* if you add "book_detail" here you get circular reference */
-                ]
-            ]
+        return $this->json(
+            $this->getJsonContent(
+                $this->paginator->getPaginate($booksQuery)
+            ),
         );
-
-        return $this->json($jsonContent);
     }
 
     /**
@@ -46,26 +36,20 @@ class BooksController extends BaseController
         $authors = $request->get('authors', []);
 
         foreach ($authors as $authorId) {
-            $authorId = (int) $authorId;
+            $authorId = (int)$authorId;
             $author = $this->entityManager->find(Author::class, $authorId);
-            if (empty($author)) {
-                throw $this->createNotFoundException('Author with this ID not found');
-            }
+            $this->validate($author);
             $book->appendAuthor($author);
         }
 
-        $errors = (string) $this->validator->validate($book);
-
-        if(!empty($errors)) {
-            throw $this->createNotFoundException($errors);
-        }
+        $this->validate($book);
 
         $this->entityManager->persist($book);
         $this->entityManager->flush();
 
         return $this->json(
             $this->getJsonContent($book),
-      Response::HTTP_CREATED
+            Response::HTTP_CREATED
         );
     }
 
@@ -75,25 +59,9 @@ class BooksController extends BaseController
      */
     public function show(Book $book): Response
     {
-        if (!$book) {
-            throw $this->createNotFoundException('The product does not exist');
-        }
-
-        $jsonContent = $this->serializer->serialize(
-            [
-                'data' => $book
-            ],
-            'json',
-            [
-                'groups' => [
-                    'book',
-                    'author',
-                    'author_detail' /* if you add "book_detail" here you get circular reference */
-                ]
-            ]
+        return $this->json(
+            $this->getJsonContent($book)
         );
-
-        return $this->json($jsonContent);
     }
 
     /**
@@ -108,38 +76,20 @@ class BooksController extends BaseController
         $book->setType($request->get('type', ""));
 
         foreach ($authors as $authorId) {
-            $authorId = (int) $authorId;
+            $authorId = (int)$authorId;
             $author = $this->entityManager->find(Author::class, $authorId);
-            if (empty($author)) {
-                throw $this->createNotFoundException('Author with this ID not found');
-            }
+            $this->validate($author);
             $book->appendAuthor($author);
         }
 
-        $errors = (string) $this->validator->validate($book);
-
-        if(!empty($errors)) {
-            throw $this->createNotFoundException($errors);
-        }
+        $this->validate($book);
 
         $this->entityManager->persist($book);
         $this->entityManager->flush();
 
-        $jsonContent = $this->serializer->serialize(
-            [
-                'data' => $book
-            ],
-            'json',
-            [
-                'groups' => [
-                    'book',
-                    'author',
-                    'author_detail' /* if you add "book_detail" here you get circular reference */
-                ]
-            ]
+        return $this->json(
+            $this->getJsonContent($book)
         );
-
-        return $this->json($jsonContent);
     }
 
     /**
@@ -150,13 +100,9 @@ class BooksController extends BaseController
         $manager = $this->getDoctrine()->getManager();
         $manager->remove($book);
         $manager->flush();
-        $data = [
-            "errors" => false,
-            'message' => 'Deleted'
-        ];
 
-        $jsonContent = $this->serializer->serialize($data, 'json');
-
-        return $this->json($jsonContent);
+        return $this->json(
+            $this->getJsonContent([], EntityGroupsEnum::ENTITY_DELETED)
+        );
     }
 }

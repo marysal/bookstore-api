@@ -2,12 +2,14 @@
 
 namespace App\Controller\Api;
 
+use App\Enum\EntityGroupsEnum;
 use App\Repository\AuthorRepository;
 use App\Repository\BookRepository;
 use App\Repository\OrderRepository;
 use App\Service\PaginatorService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -59,14 +61,15 @@ class BaseController extends AbstractController
      * @param PaginatorService $paginator
      */
     public function __construct(
-        BookRepository $bookRepository,
-        AuthorRepository $authorRepository,
-        OrderRepository $orderRepository,
+        BookRepository         $bookRepository,
+        AuthorRepository       $authorRepository,
+        OrderRepository        $orderRepository,
         EntityManagerInterface $manager,
-        SerializerInterface $serializer,
-        ValidatorInterface $validator,
-        PaginatorService $paginator
-    ) {
+        SerializerInterface    $serializer,
+        ValidatorInterface     $validator,
+        PaginatorService       $paginator
+    )
+    {
         $this->entityManager = $manager;
         $this->serializer = $serializer;
         $this->bookRepository = $bookRepository;
@@ -76,20 +79,38 @@ class BaseController extends AbstractController
         $this->paginator = $paginator;
     }
 
-    protected function getJsonContent(\StoreInterface $data): string
+    protected function getJsonContent($data, string $typeJsonContent = "books"): string
     {
+        $group = EntityGroupsEnum::getEntityGroupsList();
+
         return $this->serializer->serialize(
             [
                 'data' => $data
             ],
             'json',
             [
-                'groups' => [
-                    'book',
-                    'author',
-                    'author_detail' /* if you add "book_detail" here you get circular reference */
-                ]
+                'groups' => $group[$typeJsonContent]
             ]
         );
+    }
+
+    /**
+     * @param $entity
+     * @throws NotFoundHttpException
+     * @return bool|null
+     */
+    protected function validate($entity): void
+    {
+        if (empty($entity)) {
+            throw $this->createNotFoundException('Object with this ID not found');
+        }
+
+        $errors = $this->validator->validate($entity);
+
+        if ($errors->has(0)) {
+            throw $this->createNotFoundException(
+                $errors->get(0)->getMessage()
+            );
+        }
     }
 }

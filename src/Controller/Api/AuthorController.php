@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Entity\Author;
+use App\Enum\EntityGroupsEnum;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -18,21 +19,11 @@ class AuthorController extends BaseController
 
         $authors = $this->authorRepository->findByFields($params);
 
-        $jsonContent = $this->serializer->serialize(
-            [
-                'data' => $authors
-            ],
-            'json',
-            [
-                'groups' => [
-                    'book',
-                    'author',
-                    'book_detail' /* if you add "author_detail" here you get circular reference */
-                ]
-            ]
+        return $this->json(
+            $this->getJsonContent(
+                $this->getJsonContent($authors, EntityGroupsEnum::ENTITY_AUTHORS)
+            )
         );
-
-        return $this->json($jsonContent);
     }
 
     /**
@@ -40,28 +31,27 @@ class AuthorController extends BaseController
      */
     public function create(Request $request): Response
     {
-        $name = $request->get('name', "");
-
-        $author = new Author();
-        $author->setName($name);
+        $author = $this->serializer->deserialize(
+            $request->getContent(),
+            Author::class,
+            'json'
+        );
 
         $errors = $this->validator->validate($author);
 
-        if(!empty($errors)) {
-            throw $this->createNotFoundException($errors->get(0)->getMessage());
+        if ($errors->has(0)) {
+            throw $this->createNotFoundException(
+                $errors->get(0)->getMessage()
+            );
         }
 
         $this->entityManager->persist($author);
         $this->entityManager->flush();
 
-        $jsonContent = $this->serializer->serialize(
-            [
-                'data' => $author
-            ],
-            'json'
+        return $this->json(
+            $this->getJsonContent($author, EntityGroupsEnum::ENTITY_AUTHORS),
+            Response::HTTP_CREATED
         );
-
-        return $this->json($jsonContent, Response::HTTP_CREATED);
     }
 
     /**
@@ -69,21 +59,9 @@ class AuthorController extends BaseController
      */
     public function show(Author $author): Response
     {
-        $jsonContent = $this->serializer->serialize(
-            [
-                'data' => $author
-            ],
-            'json',
-            [
-                'groups' => [
-                    'book',
-                    'author',
-                    'book_detail' /* if you add "author_detail" here you get circular reference */
-                ]
-            ]
+        return $this->json(
+            $this->getJsonContent($author)
         );
-
-        return $this->json($jsonContent);
     }
 
     /**
@@ -93,30 +71,14 @@ class AuthorController extends BaseController
     {
         $author->setName($request->get('name', ""));
 
-        $errors = (string) $this->validator->validate($author);
-
-        if(!empty($errors)) {
-            throw $this->createNotFoundException($errors);
-        }
+        $this->validate($author);
 
         $this->entityManager->persist($author);
         $this->entityManager->flush();
 
-        $jsonContent = $this->serializer->serialize(
-            [
-                'data' => $author
-            ],
-            'json',
-            [
-                'groups' => [
-                    'book',
-                    'author',
-                    'book_detail' /* if you add "author_detail" here you get circular reference */
-                ]
-            ]
+        return $this->json(
+            $this->getJsonContent($author, EntityGroupsEnum::ENTITY_AUTHORS)
         );
-
-        return $this->json($jsonContent);
     }
 
     /**
@@ -127,13 +89,9 @@ class AuthorController extends BaseController
         $manager = $this->getDoctrine()->getManager();
         $manager->remove($author);
         $manager->flush();
-        $data = [
-            "errors" => false,
-            'message' => 'Deleted'
-        ];
 
-        $jsonContent = $this->serializer->serialize($data, 'json');
-
-        return $this->json($jsonContent);
+        return $this->json(
+            $this->getJsonContent([], EntityGroupsEnum::ENTITY_DELETED)
+        );
     }
 }
