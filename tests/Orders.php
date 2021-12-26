@@ -8,7 +8,7 @@ use App\Repository\BookRepository;
 use App\Entity\Book;
 use App\Enum\StatusesOrdersEnum;
 
-class OrdersController extends BaseControllerTest
+class Orders extends BaseTest
 {
     public function testList()
     {

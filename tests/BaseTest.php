@@ -1,11 +1,19 @@
 <?php
+
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
-class BaseControllerTest extends WebTestCase
+class BaseTest extends WebTestCase
 {
+    protected $client;
+
     protected static $token;
 
     protected static $header;
+
+    protected function setUp(): void
+    {
+        $this->client = static::createClient([]);
+    }
 
     public static function setUpBeforeClass(): void
     {
