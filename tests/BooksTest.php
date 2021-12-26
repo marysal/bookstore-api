@@ -33,10 +33,8 @@ class BooksTest extends BaseTest
 
     public function setAuthorId(): void
     {
-        $client = static::createClient([]);
-
         /** @var AuthorRepository $authorRepository */
-        $authorRepository = $client->getContainer()->get('doctrine')->getRepository(Author::class);
+        $authorRepository = $this->client->getContainer()->get('doctrine')->getRepository(Author::class);
         $authors = $authorRepository->findOne();
         $this->authorId = $authors[0]->getId();
     }
@@ -74,10 +72,8 @@ class BooksTest extends BaseTest
 
     public function setBookId()
     {
-        $client = static::createClient([]);
-
         /** @var BookRepository $bookRepository */
-        $bookRepository = $client->getContainer()->get('doctrine')->getRepository(Book::class);
+        $bookRepository = $this->client->getContainer()->get('doctrine')->getRepository(Book::class);
         $books = $bookRepository->findOne();
         $this->bookId = $books[0]->getId();
     }

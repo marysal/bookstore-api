@@ -12,11 +12,13 @@ class BaseTest extends WebTestCase
 
     protected function setUp(): void
     {
+        self::ensureKernelShutdown();
         $this->client = static::createClient([]);
     }
 
     public static function setUpBeforeClass(): void
     {
+        self::ensureKernelShutdown();
         static::setToken();
     }
 
