@@ -47,6 +47,7 @@ class BooksController extends BaseController
         $this->entityManager->persist($book);
         $this->entityManager->flush();
 
+
         return $this->json(
             $this->getJsonContent($book),
             Response::HTTP_CREATED

@@ -70,6 +70,7 @@ class BaseController extends AbstractController
         PaginatorService       $paginator
     )
     {
+
         $this->entityManager = $manager;
         $this->serializer = $serializer;
         $this->bookRepository = $bookRepository;
@@ -79,6 +80,11 @@ class BaseController extends AbstractController
         $this->paginator = $paginator;
     }
 
+    /**
+     * @param $data
+     * @param string $typeJsonContent
+     * @return string
+     */
     protected function getJsonContent($data, string $typeJsonContent = "books"): string
     {
         $group = EntityGroupsEnum::getEntityGroupsList();
@@ -105,11 +111,12 @@ class BaseController extends AbstractController
             throw $this->createNotFoundException('Object with this ID not found');
         }
 
+
         $errors = $this->validator->validate($entity);
 
         if ($errors->has(0)) {
             throw $this->createNotFoundException(
-                $errors->get(0)->getMessage()
+                $errors->get(0)->getPropertyPath(). ": ".$errors->get(0)->getMessage()
             );
         }
     }

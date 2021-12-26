@@ -48,6 +48,7 @@ class Book
     /**
      * @Groups("book")
      * @ORM\Column(type="string", nullable=true)
+     * @Assert\NotBlank()
      * @Assert\Choice({"prose", "poetry"}, message="You can choose 'prose' or 'poetry'")
      */
     private $type;

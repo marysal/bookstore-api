@@ -8,41 +8,8 @@ use App\Repository\BookRepository;
 use App\Entity\Book;
 use App\Enum\StatusesOrdersEnum;
 
-class OrdersControllerTest extends WebTestCase
+class OrdersController extends BaseControllerTest
 {
-    private static $token;
-
-    private static $header;
-
-    public static function setUpBeforeClass(): void
-    {
-        static::setToken();
-    }
-
-    private static function setToken()
-    {
-        $client = static::createClient([]);
-
-        $client->request(
-            "POST",
-            "/api/auth/login",
-            [],
-            [],
-            ["CONTENT_TYPE" => "application/json"],
-            json_encode(["username" => "admin@admin.admin", "password" => "123456"])
-        );
-
-        $content = json_decode($client->getResponse()->getContent());
-
-        self::$token = $content->token;
-        self::$header = [
-            'HTTP_Authorization' => sprintf('%s %s', 'Bearer',  self::$token),
-            'HTTP_CONTENT_TYPE' => 'application/json',
-            'HTTP_ACCEPT'       => 'application/json',
-        ];
-    }
-
-
     public function testList()
     {
         $client = static::createClient([]);

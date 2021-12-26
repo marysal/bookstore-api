@@ -3,22 +3,12 @@
 use App\Entity\Author;
 use App\Entity\Book;
 use App\Repository\AuthorRepository;
-use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 use App\Repository\BookRepository;
 
-class BookControllerTest extends WebTestCase
+class BookControllerTest extends BaseControllerTest
 {
-    private static $token;
-
-    private static $header;
-
-    public static function setUpBeforeClass(): void
-    {
-        static::setToken();
-    }
-
-    public function testGET()
+    public function GET()
     {
         $client = static::createClient([]);
 
@@ -53,7 +43,8 @@ class BookControllerTest extends WebTestCase
             "/api/books/create",
             $body,
             [],
-            self::$header
+            self::$header,
+            json_encode($body)
         );
 
         $content = json_decode(json_decode($client->getResponse()->getContent()), true);
@@ -78,7 +69,7 @@ class BookControllerTest extends WebTestCase
         $this->assertSame(Response::HTTP_OK, $client->getResponse()->getStatusCode());
     }
 
-    public function testUpdate()
+    public function Update()
     {
         $client = static::createClient([]);
 
@@ -132,7 +123,7 @@ class BookControllerTest extends WebTestCase
         $this->assertSame(Response::HTTP_OK, $client->getResponse()->getStatusCode());
     }
 
-    public function testDestroy()
+    public function Destroy()
     {
         $client = static::createClient([]);
 
@@ -171,28 +162,5 @@ class BookControllerTest extends WebTestCase
         );
 
         $this->assertSame(Response::HTTP_OK, $client->getResponse()->getStatusCode());
-    }
-
-    private static function setToken(): void
-    {
-        $client = static::createClient([]);
-
-        $client->request(
-            "POST",
-            "/api/auth/login",
-            [],
-            [],
-            ["CONTENT_TYPE" => "application/json"],
-            json_encode(["username" => "admin@admin.admin", "password" => "123456"])
-        );
-
-        $content = json_decode($client->getResponse()->getContent());
-
-        self::$token = $content->token;
-        self::$header = [
-            'HTTP_Authorization' => sprintf('%s %s', 'Bearer',  self::$token),
-            'HTTP_CONTENT_TYPE' => 'application/json',
-            'HTTP_ACCEPT'       => 'application/json',
-        ];
     }
 }

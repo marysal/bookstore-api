@@ -3,18 +3,8 @@
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
-class AuthorControllerTest extends WebTestCase
+class AuthorController extends BaseControllerTest
 {
-
-    private static $token;
-
-    private static $header;
-
-    public static function setUpBeforeClass(): void
-    {
-        static::setToken();
-    }
-
     public function testGET()
     {
          $client = static::createClient([]);
@@ -148,28 +138,5 @@ class AuthorControllerTest extends WebTestCase
         );
 
         $this->assertSame(Response::HTTP_OK, $client->getResponse()->getStatusCode());
-    }
-
-    private static function setToken(): void
-    {
-        $client = static::createClient([]);
-
-        $client->request(
-            "POST",
-            "/api/auth/login",
-            [],
-            [],
-            ["CONTENT_TYPE" => "application/json"],
-            json_encode(["username" => "admin@admin.admin", "password" => "123456"])
-        );
-
-        $content = json_decode($client->getResponse()->getContent());
-
-        self::$token = $content->token;
-        self::$header = [
-            'HTTP_Authorization' => sprintf('%s %s', 'Bearer',  self::$token),
-            'HTTP_CONTENT_TYPE' => 'application/json',
-            'HTTP_ACCEPT'       => 'application/json',
-        ];
     }
 }
