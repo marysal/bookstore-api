@@ -7,15 +7,15 @@ class UpdateBookTest extends BooksTest
     /**
      * @dataProvider bookUpdateDataProvider
      */
-    public function testUpdate($book)
+    public function testUpdate($title, $description, $type)
     {
         self::$client->request(
             "PUT",
             "/api/books/{$this->getLastBookId()}",
-            $book,
+            self::$bookDataForUpdate,
             [],
             self::$header,
-            json_encode($book)
+            json_encode(self::$bookDataForUpdate)
         );
 
         $changedContent = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
@@ -24,22 +24,20 @@ class UpdateBookTest extends BooksTest
         $this->assertNotEmpty($changedContent);
         $this->assertArrayHasKey("id", $changedContent['data']);
         $this->assertArrayHasKey("title", $changedContent['data']);
-        $this->assertSame("Changed title", $changedContent['data']['title']);
+        $this->assertSame($title, $changedContent['data']['title']);
         $this->assertArrayHasKey("description", $changedContent['data']);
-        $this->assertSame("Changed description", $changedContent['data']['description']);
+        $this->assertSame($description, $changedContent['data']['description']);
         $this->assertArrayHasKey("type", $changedContent['data']);
-        $this->assertSame("prose", $changedContent['data']['type']);
+        $this->assertSame($type, $changedContent['data']['type']);
     }
 
     public function bookUpdateDataProvider()
     {
         return [
             [
-                [
-                    "title" => "Changed title",
-                    "description" => "Changed description",
-                    "type" => "prose"
-                ]
+                "title" => "Changed title",
+                "description" => "Changed description",
+                "type" => "prose"
             ]
         ];
     }

@@ -20,6 +20,16 @@ class BaseTest extends WebTestCase
 
     protected static $header;
 
+    protected $author;
+
+    protected $lastAuthorId;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->setAuthor();
+    }
+
     public static function setUpBeforeClass(): void
     {
         self::ensureKernelShutdown();
@@ -46,6 +56,38 @@ class BaseTest extends WebTestCase
             'HTTP_CONTENT_TYPE' => 'application/json',
             'HTTP_ACCEPT'       => 'application/json'
         ];
+    }
+
+    /**
+     * @return int
+     */
+    public function getLastAuthorId(): int
+    {
+        return $this->lastAuthorId;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAuthor()
+    {
+        return $this->author;
+    }
+
+    protected function setAuthor()
+    {
+        self::$client->request(
+            "POST",
+            "/api/authors/create",
+            self::$singleAuthor,
+            [],
+            self::$header,
+            json_encode(self::$singleAuthor)
+        );
+
+        $this->author = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
+
+        $this->lastAuthorId = $this->author['data']['id'];
     }
 
     public function authorDataProvider()

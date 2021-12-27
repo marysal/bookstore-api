@@ -7,24 +7,25 @@ use App\Repository\BookRepository;
 
 class BooksTest extends BaseTest
 {
+    protected static $bookDataForUpdate =  [
+        "title" => "Changed title",
+        "description" => "Changed description",
+        "type" => "prose"
+    ];
+
     protected static $authorId;
 
     protected static $bookId;
 
-    protected $author;
-
     protected $book;
 
     protected $lastBookId;
-
-    protected $lastAuthorId;
 
     protected $booksCount;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->setAuthor();
         $this->setBook();
         $this->setBooksCount();
     }
@@ -97,41 +98,9 @@ class BooksTest extends BaseTest
     /**
      * @return int
      */
-    public function getLastAuthorId(): int
-    {
-        return $this->lastAuthorId;
-    }
-
-    /**
-     * @return int
-     */
     public function getLastBookId(): int
     {
         return $this->lastBookId;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getAuthor()
-    {
-        return $this->author;
-    }
-
-    protected function setAuthor()
-    {
-        self::$client->request(
-            "POST",
-            "/api/authors/create",
-            self::$singleAuthor,
-            [],
-            self::$header,
-            json_encode(self::$singleAuthor)
-        );
-
-        $this->author = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
-
-        $this->lastAuthorId = $this->author['data']['id'];
     }
 
     /**
