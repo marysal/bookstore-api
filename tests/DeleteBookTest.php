@@ -6,14 +6,14 @@ class DeleteBookTest extends BooksTest
 {
     public function testDestroy()
     {
-        $this->client->request(
+        self::$client->request(
             "DELETE",
-            "/api/books/{$this->lastBookId}",
+            "/api/books/{$this->getLastBookId()}",
             [],
             [],
             self::$header
         );
 
-        $this->assertSame(Response::HTTP_OK, $this->client->getResponse()->getStatusCode());
+        $this->assertSame(Response::HTTP_OK, self::$client->getResponse()->getStatusCode());
     }
 }

@@ -7,20 +7,30 @@ use App\Repository\BookRepository;
 
 class BooksTest extends BaseTest
 {
+    protected static $authorId;
+
+    protected static $bookId;
+
+    protected $author;
+
     protected $book;
 
-    protected $authorId;
-
-    protected $bookId;
-
     protected $lastBookId;
+
+    protected $lastAuthorId;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->setAuthorId();
-        $this->setBookId();
+        $this->setAuthor();
         $this->setBook();
+    }
+
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
+        self::setAuthorId();
+        self::setBookId();
     }
 
     /**
@@ -28,38 +38,15 @@ class BooksTest extends BaseTest
      */
     public function getAuthorId()
     {
-        return $this->authorId;
+        return self::$authorId;
     }
 
-    public function setAuthorId(): void
+    public static function setAuthorId(): void
     {
         /** @var AuthorRepository $authorRepository */
-        $authorRepository = $this->client->getContainer()->get('doctrine')->getRepository(Author::class);
+        $authorRepository = self::$client->getContainer()->get('doctrine')->getRepository(Author::class);
         $authors = $authorRepository->findOne();
-        $this->authorId = $authors[0]->getId();
-    }
-
-    public function bookDataProvider()
-    {
-        return [
-            "title" => "New title",
-            "description" => "New description",
-            "type" => "poetry",
-            "authors" => [$this->getAuthorId()]
-        ];
-    }
-
-    public function bookUpdateDataProvider()
-    {
-        return [
-            [
-                [
-                    "title" => "Changed title",
-                    "description" => "Changed description",
-                    "type" => "prose"
-                ]
-            ]
-        ];
+        self::$authorId = $authors[0]->getId();
     }
 
     /**
@@ -67,15 +54,15 @@ class BooksTest extends BaseTest
      */
     public function getBookId()
     {
-        return $this->bookId;
+        return self::$bookId;
     }
 
-    public function setBookId()
+    public static function setBookId()
     {
         /** @var BookRepository $bookRepository */
-        $bookRepository = $this->client->getContainer()->get('doctrine')->getRepository(Book::class);
+        $bookRepository = self::$client->getContainer()->get('doctrine')->getRepository(Book::class);
         $books = $bookRepository->findOne();
-        $this->bookId = $books[0]->getId();
+        self::$bookId = $books[0]->getId();
     }
 
     /**
@@ -86,30 +73,77 @@ class BooksTest extends BaseTest
         return $this->book;
     }
 
-    private function setBook()
+    private function setBook(): void
     {
-        /**
-         * I use the provider in this way, because of it's initialized before the setUp()
-         * method and the author's id doesn't have time to be installed
-         */
-        $book = $this->bookDataProvider();
+        self::$singleBook["authors"] = [$this->getLastAuthorId()];
 
-         $this->client->request(
+        self::$client->request(
             "POST",
             "/api/books/create",
-            $book,
+            self::$singleBook,
             [],
             self::$header,
-            json_encode($book)
+            json_encode(self::$singleBook)
         );
 
-        $this->book = json_decode(json_decode($this->client->getResponse()->getContent()), true);
+        $this->book = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
 
         $this->lastBookId = $this->book['data']['id'];
+    }
+
+    /**
+     * @return int
+     */
+    public function getLastAuthorId(): int
+    {
+        return $this->lastAuthorId;
+    }
+
+    /**
+     * @return int
+     */
+    public function getLastBookId(): int
+    {
+        return $this->lastBookId;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAuthor()
+    {
+        return $this->author;
+    }
+
+    protected function setAuthor()
+    {
+        self::$client->request(
+            "POST",
+            "/api/authors/create",
+            self::$singleAuthor,
+            [],
+            self::$header,
+            json_encode(self::$singleAuthor)
+        );
+
+        $this->author = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
+
+        $this->lastAuthorId = $this->author['data']['id'];
     }
 
     protected function tearDown(): void
     {
         $this->book = null;
+        $this->author = null;
+
+        self::$client->request(
+            "DELETE",
+            "/api/authors/{$this->lastAuthorId}",
+            [],
+            [],
+            self::$header
+        );
+        $this->lastBookId = null;
+        self::$authorId = null;
     }
 }
