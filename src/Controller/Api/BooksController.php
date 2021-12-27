@@ -8,6 +8,7 @@ use App\Enum\EntityGroupsEnum;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 class BooksController extends BaseController
 {
@@ -47,7 +48,6 @@ class BooksController extends BaseController
         $this->entityManager->persist($book);
         $this->entityManager->flush();
 
-
         return $this->json(
             $this->getJsonContent($book),
             Response::HTTP_CREATED
@@ -70,11 +70,17 @@ class BooksController extends BaseController
      */
     public function update(Request $request, Book $book): Response
     {
-        $authors = $request->get('authors', []);
 
-        $book->setTitle($request->get('title', ""));
-        $book->setDescription($request->get('description', ""));
-        $book->setType($request->get('type', ""));
+        $book = $this->serializer->deserialize(
+            $request->getContent(),
+            Book::class,
+            'json',
+            [
+                AbstractNormalizer::OBJECT_TO_POPULATE => $book
+            ],
+        );
+
+        $authors = $request->get('authors', []);
 
         foreach ($authors as $authorId) {
             $authorId = (int)$authorId;

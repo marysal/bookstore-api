@@ -8,6 +8,7 @@ use App\Enum\EntityGroupsEnum;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 class OrdersController extends BaseController
 {
@@ -72,11 +73,16 @@ class OrdersController extends BaseController
      */
     public function update(Request $request, Order $order): Response
     {
-        $books = $request->get('books', []);
+        $order = $this->serializer->deserialize(
+            $request->getContent(),
+            Order::class,
+            'json',
+            [
+                AbstractNormalizer::OBJECT_TO_POPULATE => $order
+            ],
+        );
 
-        $order->setPhone($request->get('phone', ""));
-        $order->setAddress($request->get('address', ""));
-        $order->setStatus($request->get('status', ""));
+        $books = $request->get('books', []);
 
         $this->validate($books);
 

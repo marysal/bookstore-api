@@ -7,6 +7,7 @@ use App\Enum\EntityGroupsEnum;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 class AuthorController extends BaseController
 {
@@ -69,7 +70,14 @@ class AuthorController extends BaseController
      */
     public function update(Request $request, Author $author): Response
     {
-        $author->setName($request->get('name', ""));
+        $author = $this->serializer->deserialize(
+            $request->getContent(),
+            Author::class,
+            'json',
+            [
+                AbstractNormalizer::OBJECT_TO_POPULATE => $author
+            ],
+        );
 
         $this->validate($author);
 
