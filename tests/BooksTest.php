@@ -19,11 +19,14 @@ class BooksTest extends BaseTest
 
     protected $lastAuthorId;
 
+    protected $booksCount;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->setAuthor();
         $this->setBook();
+        $this->setBooksCount();
     }
 
     public static function setUpBeforeClass(): void
@@ -131,6 +134,25 @@ class BooksTest extends BaseTest
         $this->lastAuthorId = $this->author['data']['id'];
     }
 
+    /**
+     * @return int
+     */
+    public function getBooksCount(): int
+    {
+        return $this->booksCount;
+    }
+
+    private function setBooksCount()
+    {
+        /** @var BookRepository $book */
+        $book = self::$client->getContainer()->get('doctrine')->getRepository(Book::class);
+        $this->booksCount = $book->createQueryBuilder('t')
+            ->select('count(t.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+        //var_dump($this->booksCount);
+    }
+
     protected function tearDown(): void
     {
         $this->book = null;
@@ -138,12 +160,21 @@ class BooksTest extends BaseTest
 
         self::$client->request(
             "DELETE",
-            "/api/authors/{$this->lastAuthorId}",
+            "/api/books/{$this->getLastBookId()}",
             [],
             [],
             self::$header
         );
+
+        self::$client->request(
+            "DELETE",
+            "/api/authors/{$this->getLastAuthorId()}",
+            [],
+            [],
+            self::$header
+        );
+
         $this->lastBookId = null;
-        self::$authorId = null;
+        $this->lastAuthorId = null;
     }
 }
