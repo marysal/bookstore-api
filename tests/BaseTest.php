@@ -137,13 +137,9 @@ class BaseTest extends WebTestCase
             json_encode(self::$singleBook)
         );
 
-        //var_dump(json_decode(json_decode(self::$client->getResponse()->getContent()), true));
-
         $this->book = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
 
         $this->lastBookId = $this->book['data']['id'];
-
-        //var_dump( $this->lastBookId);
     }
 
     /**
