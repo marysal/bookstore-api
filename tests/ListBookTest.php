@@ -21,7 +21,12 @@ class ListBookTest extends BooksTest
     public function testPaginate()
     {
         $countPage = ceil($this->getBooksCount() / PaginatorService::ITEMS_PER_PAGE);
-        $countLastPageEntries = (int) ($this->getBooksCount() - (PaginatorService::ITEMS_PER_PAGE * ($countPage - 1)));
+        $countFullPage = floor($this->getBooksCount() / PaginatorService::ITEMS_PER_PAGE);
+        $countLastPageEntries = $this->getBooksCount() - ($countFullPage * PaginatorService::ITEMS_PER_PAGE);
+
+        if (empty($countLastPageEntries)) {
+            $countLastPageEntries = PaginatorService::ITEMS_PER_PAGE;
+        }
 
         self::$client->request(
             "GET",

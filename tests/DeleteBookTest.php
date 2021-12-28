@@ -16,4 +16,23 @@ class DeleteBookTest extends BooksTest
 
         $this->assertSame(Response::HTTP_OK, self::$client->getResponse()->getStatusCode());
     }
+
+    protected function tearDown(): void
+    {
+        self::$client->request(
+            "DELETE",
+            "/api/authors/{$this->getLastAuthorId()}",
+            [],
+            [],
+            self::$header
+        );
+
+        self::$client->request(
+            "DELETE",
+            "/api/orders/{$this->getLastOrderId()}",
+            [],
+            [],
+            self::$header
+        );
+    }
 }

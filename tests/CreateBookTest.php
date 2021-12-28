@@ -55,7 +55,7 @@ class CreateBookTest extends BooksTest
 
     protected function tearDown(): void
     {
-       self::$client->request(
+        self::$client->request(
             "DELETE",
             "/api/books/{$this->getLastBookId()}",
             [],

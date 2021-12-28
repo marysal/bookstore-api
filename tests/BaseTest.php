@@ -137,9 +137,13 @@ class BaseTest extends WebTestCase
             json_encode(self::$singleBook)
         );
 
+        //var_dump(json_decode(json_decode(self::$client->getResponse()->getContent()), true));
+
         $this->book = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
 
         $this->lastBookId = $this->book['data']['id'];
+
+        //var_dump( $this->lastBookId);
     }
 
     /**
@@ -194,10 +198,6 @@ class BaseTest extends WebTestCase
 
     protected function tearDown(): void
     {
-        $this->book = null;
-        $this->author = null;
-        $this->order = null;
-
         self::$client->request(
             "DELETE",
             "/api/books/{$this->getLastBookId()}",
@@ -221,9 +221,5 @@ class BaseTest extends WebTestCase
             [],
             self::$header
         );
-
-        $this->lastBookId = null;
-        $this->lastAuthorId = null;
-        $this->lastOrderId = null;
     }
 }
