@@ -31,16 +31,20 @@ class BaseTest extends WebTestCase
 
     protected $author;
 
+    protected $order;
+
     protected $lastAuthorId;
 
-
     protected $lastBookId;
+
+    protected $lastOrderId;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->setAuthor();
         $this->setBook();
+        $this->setOrder();
     }
 
     public static function setUpBeforeClass(): void
@@ -107,6 +111,14 @@ class BaseTest extends WebTestCase
     /**
      * @return mixed
      */
+    public function getOrder()
+    {
+        return $this->order;
+    }
+
+    /**
+     * @return mixed
+     */
     public function getBook()
     {
         return $this->book;
@@ -133,6 +145,32 @@ class BaseTest extends WebTestCase
     /**
      * @return int
      */
+    public function getLastOrderId(): int
+    {
+        return $this->lastOrderId;
+    }
+
+    private function setOrder()
+    {
+        self::$singleOrder["books"] = [$this->getLastBookId()];
+
+        self::$client->request(
+            "POST",
+            "/api/orders/create",
+            self::$singleOrder,
+            [],
+            self::$header,
+            json_encode(self::$singleOrder)
+        );
+
+        $this->order = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
+
+        $this->lastOrderId = $this->order['data']['id'];
+    }
+
+    /**
+     * @return int
+     */
     public function getLastBookId(): int
     {
         return $this->lastBookId;
@@ -154,12 +192,38 @@ class BaseTest extends WebTestCase
         self::$bookId = $books[0]->getId();
     }
 
-    public function authorDataProvider()
+    protected function tearDown(): void
     {
-        return [
-            [
-                "name" => "Fedor Dostojevskij"
-            ]
-        ];
+        $this->book = null;
+        $this->author = null;
+        $this->order = null;
+
+        self::$client->request(
+            "DELETE",
+            "/api/books/{$this->getLastBookId()}",
+            [],
+            [],
+            self::$header
+        );
+
+        self::$client->request(
+            "DELETE",
+            "/api/authors/{$this->getLastAuthorId()}",
+            [],
+            [],
+            self::$header
+        );
+
+        self::$client->request(
+            "DELETE",
+            "/api/orders/{$this->getLastOrderId()}",
+            [],
+            [],
+            self::$header
+        );
+
+        $this->lastBookId = null;
+        $this->lastAuthorId = null;
+        $this->lastOrderId = null;
     }
 }

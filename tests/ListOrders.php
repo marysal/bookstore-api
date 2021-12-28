@@ -2,7 +2,7 @@
 
 use Symfony\Component\HttpFoundation\Response;
 
-class ListOrdersTest extends BaseTest
+class ListOrders extends BaseTest
 {
     public function testList()
     {

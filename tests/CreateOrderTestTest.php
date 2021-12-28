@@ -3,7 +3,7 @@
 use App\Enum\StatusesOrdersEnum;
 use Symfony\Component\HttpFoundation\Response;
 
-class CreateOrderTest extends BaseTest
+class CreateOrderTestTest extends BaseTest
 {
     /**
      * @dataProvider orderDataProvider
