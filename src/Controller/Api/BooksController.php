@@ -18,12 +18,13 @@ class BooksController extends BaseController
     public function list(Request $request)
     {
         $params = $request->query->all();
+        $page = $params["page"] ?? 1;
 
         $booksQuery = $this->bookRepository->getQueryByFields($params);
 
         return $this->json(
             $this->getJsonContent(
-                $this->paginator->getPaginate($booksQuery)
+                $this->paginator->getPaginate($booksQuery, $page)
             ),
         );
     }
@@ -104,6 +105,7 @@ class BooksController extends BaseController
      */
     public function destroy(Book $book): Response
     {
+        //var_dump($book);
         $manager = $this->getDoctrine()->getManager();
         $manager->remove($book);
         $manager->flush();

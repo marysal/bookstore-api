@@ -1,10 +1,31 @@
 <?php
 
-use Symfony\Component\HttpFoundation\Response;
 use App\Service\PaginatorService;
+use Symfony\Component\HttpFoundation\Response;
 
 class ListBookTest extends BooksTest
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        self::$client->getContainer()
+            ->get("doctrine.orm.entity_manager")
+            ->createQuery("DELETE App\Entity\Book b")
+            ->execute();
+
+        foreach (range(1, 11) as $row) {
+            self::$client->request(
+                "POST",
+                "/api/books/create",
+                self::$singleBook,
+                [],
+                self::$header,
+                json_encode(self::$singleBook)
+            );
+        }
+    }
+
     public function testList()
     {
         self::$client->request(
@@ -18,16 +39,13 @@ class ListBookTest extends BooksTest
         );
     }
 
-    public function testPaginate()
+    /**
+     * @group paginate
+     * Tests the api edit form
+     * @dataProvider paginatorDataProvider
+     */
+    public function testPaginate($lastPage, $countLastPageBooks)
     {
-        $countPage = ceil($this->getBooksCount() / PaginatorService::ITEMS_PER_PAGE);
-        $countFullPage = floor($this->getBooksCount() / PaginatorService::ITEMS_PER_PAGE);
-        $countLastPageEntries = $this->getBooksCount() - ($countFullPage * PaginatorService::ITEMS_PER_PAGE);
-
-        if (empty($countLastPageEntries)) {
-            $countLastPageEntries = PaginatorService::ITEMS_PER_PAGE;
-        }
-
         self::$client->request(
             "GET",
             "/api/books?page=1"
@@ -35,13 +53,24 @@ class ListBookTest extends BooksTest
         $content = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
         $this->assertCount(PaginatorService::ITEMS_PER_PAGE, $content['data']);
 
-
         self::$client->request(
             "GET",
-            "/api/books?page={$countPage}"
+            "/api/books?page=4",
+            ["page" => $lastPage]
         );
+
         $lastPageContent = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
 
-        $this->assertCount($countLastPageEntries, $lastPageContent['data']);
+        $this->assertCount($countLastPageBooks, $lastPageContent['data']);
+    }
+
+    public function paginatorDataProvider()
+    {
+        return [
+            [
+                "lastPage" => 4,
+                "countLastPageBooks" => 2
+            ]
+        ];
     }
 }

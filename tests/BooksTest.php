@@ -17,13 +17,13 @@ class BooksTest extends BaseTest
 
     protected $book;
 
-    protected $booksCount;
+    //protected $booksCount;
 
-    protected function setUp(): void
+   /* protected function setUp(): void
     {
         parent::setUp();
         $this->setBooksCount();
-    }
+    }*/
 
     public static function setUpBeforeClass(): void
     {
@@ -50,18 +50,18 @@ class BooksTest extends BaseTest
     /**
      * @return int
      */
-    public function getBooksCount(): int
+   /* public function getBooksCount(): int
     {
         return $this->booksCount;
     }
 
     private function setBooksCount()
     {
-        /** @var BookRepository $book */
+
         $book = self::$client->getContainer()->get('doctrine')->getRepository(Book::class);
         $this->booksCount = $book->createQueryBuilder('t')
             ->select('count(t.id)')
             ->getQuery()
             ->getSingleScalarResult();
-    }
+    }*/
 }

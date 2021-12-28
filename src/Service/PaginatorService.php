@@ -3,7 +3,6 @@
 namespace App\Service;
 
 use Knp\Component\Pager\PaginatorInterface;
-use Symfony\Component\HttpFoundation\Request;
 
 class PaginatorService
 {
@@ -14,22 +13,16 @@ class PaginatorService
      */
     public $paginator;
 
-    /**
-     * @var Request
-     */
-    private $request;
-
     public function __construct(PaginatorInterface $paginator)
     {
         $this->paginator = $paginator;
-        $this->request = Request::createFromGlobals();
     }
 
-    public function getPaginate($booksQuery)
+    public function getPaginate($booksQuery, int $page = 1)
     {
         return $this->paginator->paginate(
             $booksQuery,
-            $this->request->query->getInt('page', 1),
+            $page,
             self::ITEMS_PER_PAGE
         );
     }
