@@ -15,18 +15,13 @@ class BooksTest extends BaseTest
 
     protected static $authorId;
 
-    protected static $bookId;
-
     protected $book;
-
-    protected $lastBookId;
 
     protected $booksCount;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->setBook();
         $this->setBooksCount();
     }
 
@@ -34,7 +29,6 @@ class BooksTest extends BaseTest
     {
         parent::setUpBeforeClass();
         self::setAuthorId();
-        self::setBookId();
     }
 
     /**
@@ -54,56 +48,6 @@ class BooksTest extends BaseTest
     }
 
     /**
-     * @return mixed
-     */
-    public function getBookId()
-    {
-        return self::$bookId;
-    }
-
-    public static function setBookId()
-    {
-        /** @var BookRepository $bookRepository */
-        $bookRepository = self::$client->getContainer()->get('doctrine')->getRepository(Book::class);
-        $books = $bookRepository->findOne();
-        self::$bookId = $books[0]->getId();
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getBook()
-    {
-        return $this->book;
-    }
-
-    private function setBook(): void
-    {
-        self::$singleBook["authors"] = [$this->getLastAuthorId()];
-
-        self::$client->request(
-            "POST",
-            "/api/books/create",
-            self::$singleBook,
-            [],
-            self::$header,
-            json_encode(self::$singleBook)
-        );
-
-        $this->book = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
-
-        $this->lastBookId = $this->book['data']['id'];
-    }
-
-    /**
-     * @return int
-     */
-    public function getLastBookId(): int
-    {
-        return $this->lastBookId;
-    }
-
-    /**
      * @return int
      */
     public function getBooksCount(): int
@@ -119,7 +63,6 @@ class BooksTest extends BaseTest
             ->select('count(t.id)')
             ->getQuery()
             ->getSingleScalarResult();
-        //var_dump($this->booksCount);
     }
 
     protected function tearDown(): void

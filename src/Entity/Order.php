@@ -36,6 +36,7 @@ class Order
      * @Groups("order")
      * @ORM\Column(type="string", length=20, nullable=false)
      * @CustomAssert\PhoneConstraint()
+     * @CustomAssert\ApiPhoneConstraint(groups="notests")
      */
     private $phone;
 

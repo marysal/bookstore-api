@@ -12,17 +12,17 @@ class CreateBookTest extends BooksTest
     /**
      * @dataProvider bookDataProvider
      */
-    public function testCreate($book)
+    public function testCreate($title, $description, $type)
     {
-        $book["authors"] = [$this->getLastAuthorId()];
+        self::$singleBook["authors"] = [$this->getLastAuthorId()];
 
         self::$client->request(
             "POST",
             "/api/books/create",
-            $book,
+            self::$singleBook,
             [],
             self::$header,
-            json_encode($book)
+            json_encode(self::$singleBook)
         );
 
         $content = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
@@ -31,10 +31,12 @@ class CreateBookTest extends BooksTest
         $this->assertNotEmpty($content);
         $this->assertArrayHasKey("id", $content['data']);
         $this->assertArrayHasKey("title", $content['data']);
-        $this->assertSame("New title", $content['data']['title']);
+        $this->assertSame($title, $content['data']['title']);
         $this->assertArrayHasKey("description", $content['data']);
-        $this->assertSame("New description", $content['data']['description']);
+        $this->assertSame($description, $content['data']['description']);
         $this->assertArrayHasKey("authors", $content['data']);
+        $this->assertArrayHasKey("type", $content['data']);
+        $this->assertSame($type, $content['data']['type']);
         $this->assertSame($this->getLastAuthorId(), $content['data']['authors'][0]['id']);
 
         $this->lastBookId = $content['data']['id'];
@@ -44,11 +46,9 @@ class CreateBookTest extends BooksTest
     {
         return [
             [
-                [
-                    "title" => "New title",
-                    "description" => "New description",
-                    "type" => "poetry"
-                ]
+                "title" => "New title",
+                "description" => "New description",
+                "type" => "poetry"
             ]
         ];
     }

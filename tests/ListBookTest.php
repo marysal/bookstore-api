@@ -21,7 +21,7 @@ class ListBookTest extends BooksTest
     public function testPaginate()
     {
         $countPage = ceil($this->getBooksCount() / PaginatorService::ITEMS_PER_PAGE);
-        $countLastPageEntries = $this->getBooksCount() - (PaginatorService::ITEMS_PER_PAGE * ($countPage - 1));
+        $countLastPageEntries = (int) ($this->getBooksCount() - (PaginatorService::ITEMS_PER_PAGE * ($countPage - 1)));
 
         self::$client->request(
             "GET",
@@ -36,6 +36,7 @@ class ListBookTest extends BooksTest
             "/api/books?page={$countPage}"
         );
         $lastPageContent = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
+
         $this->assertCount($countLastPageEntries, $lastPageContent['data']);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+use App\Entity\Book;
+use App\Repository\BookRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class BaseTest extends WebTestCase
@@ -14,20 +16,31 @@ class BaseTest extends WebTestCase
         "type" => "poetry"
     ];
 
+    protected static $singleOrder = [
+        "phone" => "+375(29)257-12-33",
+        "address" => "Minsk, Leonardo Da Vinche str."
+    ];
+
+    protected static $bookId;
+
     protected static $client;
 
-    protected static $token;
-
     protected static $header;
+
+    protected static $token;
 
     protected $author;
 
     protected $lastAuthorId;
 
+
+    protected $lastBookId;
+
     protected function setUp(): void
     {
         parent::setUp();
         $this->setAuthor();
+        $this->setBook();
     }
 
     public static function setUpBeforeClass(): void
@@ -35,6 +48,7 @@ class BaseTest extends WebTestCase
         self::ensureKernelShutdown();
         self::$client = static::createClient([]);
         static::setToken();
+        self::setBookId();
     }
 
     private static function setToken(): void
@@ -88,6 +102,56 @@ class BaseTest extends WebTestCase
         $this->author = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
 
         $this->lastAuthorId = $this->author['data']['id'];
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBook()
+    {
+        return $this->book;
+    }
+
+    private function setBook(): void
+    {
+        self::$singleBook["authors"] = [$this->getLastAuthorId()];
+
+        self::$client->request(
+            "POST",
+            "/api/books/create",
+            self::$singleBook,
+            [],
+            self::$header,
+            json_encode(self::$singleBook)
+        );
+
+        $this->book = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
+
+        $this->lastBookId = $this->book['data']['id'];
+    }
+
+    /**
+     * @return int
+     */
+    public function getLastBookId(): int
+    {
+        return $this->lastBookId;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBookId()
+    {
+        return self::$bookId;
+    }
+
+    public static function setBookId()
+    {
+        /** @var BookRepository $bookRepository */
+        $bookRepository = self::$client->getContainer()->get('doctrine')->getRepository(Book::class);
+        $books = $bookRepository->findOne();
+        self::$bookId = $books[0]->getId();
     }
 
     public function authorDataProvider()
