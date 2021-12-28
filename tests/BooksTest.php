@@ -64,29 +64,4 @@ class BooksTest extends BaseTest
             ->getQuery()
             ->getSingleScalarResult();
     }
-
-    protected function tearDown(): void
-    {
-        $this->book = null;
-        $this->author = null;
-
-        self::$client->request(
-            "DELETE",
-            "/api/books/{$this->getLastBookId()}",
-            [],
-            [],
-            self::$header
-        );
-
-        self::$client->request(
-            "DELETE",
-            "/api/authors/{$this->getLastAuthorId()}",
-            [],
-            [],
-            self::$header
-        );
-
-        $this->lastBookId = null;
-        $this->lastAuthorId = null;
-    }
 }
