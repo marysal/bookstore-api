@@ -32,14 +32,9 @@ class UpdateOrderTest extends BaseTest
         $this->assertSame(Response::HTTP_OK, self::$client->getResponse()->getStatusCode());
         $this->assertNotEmpty($changedOrder);
         $this->assertSame($order['data']['id'], $changedOrder['data']['id']);
-
-
-       /* $this->assertArrayHasKey("phone", $content['data']);
-        $this->assertSame($content['data']['id'], $changedContent['data']['id']);
-        $this->assertNotEquals($content['data']['phone'], $changedContent['data']['phone']);
-        $this->assertNotEquals($content['data']['address'], $changedContent['data']['address']);
-        $this->assertSame($newAddress, $changedContent['data']['address']);
-        $this->assertSame($newPhone, $changedContent['data']['phone']);*/
+        $this->assertArrayHasKey("phone", $changedOrder['data']);
+        $this->assertNotEquals($phone, $order['data']['phone']);
+        $this->assertNotEquals($address, $order['data']['address']);
     }
 
     public function orderUpdateDataProvider()
