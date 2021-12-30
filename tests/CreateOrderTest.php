@@ -44,6 +44,7 @@ class CreateOrderTest extends BaseTest
         $phone,
         $withBook,
         $wrongBookId,
+        $wrongStatus,
         $responseCode,
         $message
     ) {
@@ -52,6 +53,10 @@ class CreateOrderTest extends BaseTest
             self::$singleOrder["books"] = [$this->getLastBookId() + 9999];
         } else {
             self::$singleOrder["books"] = ($withBook) ? [$this->getLastBookId()] : [];
+        }
+
+        if($wrongStatus) {
+            self::$singleOrder["status"] = "fffffff";
         }
 
         self::$singleOrder["phone"] = $phone;
@@ -94,6 +99,7 @@ class CreateOrderTest extends BaseTest
                 "phone" => "+375(29)257-11-33",
                 "withBook" => true,
                 "wrongBookId" => false,
+                "wrongStatus" => false,
                 "responseCode" => Response::HTTP_CREATED,
                 "message" => ""
             ],
@@ -101,6 +107,7 @@ class CreateOrderTest extends BaseTest
                 "phone" => "+375(29)257",
                 "withBook" => true,
                 "wrongBookId" => false,
+                "wrongStatus" => false,
                 "responseCode" => Response::HTTP_BAD_REQUEST,
                 "message" => "phone: Invalid phone number"
             ],
@@ -108,6 +115,7 @@ class CreateOrderTest extends BaseTest
                 "phone" => "+375(29)257-11-33",
                 "withBook" => false,
                 "wrongBookId" => false,
+                "wrongStatus" => false,
                 "responseCode" => Response::HTTP_BAD_REQUEST,
                 "message" => "The order must contain at least one book ID"
             ],
@@ -115,9 +123,18 @@ class CreateOrderTest extends BaseTest
                 "phone" => "+375(29)257-11-33",
                 "withBook" => false,
                 "wrongBookId" => true,
+                "wrongStatus" => false,
                 "responseCode" => Response::HTTP_NOT_FOUND,
                 "message" => "Object with this ID not found"
             ],
+            [
+                "phone" => "+375(29)257-11-33",
+                "withBook" => true,
+                "wrongBookId" => false,
+                "wrongStatus" => true,
+                "responseCode" => Response::HTTP_BAD_REQUEST,
+                "message" => "status: The value you selected is not a valid choice."
+            ]
         ];
     }
 

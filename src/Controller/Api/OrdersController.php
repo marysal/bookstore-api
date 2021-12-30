@@ -5,6 +5,7 @@ namespace App\Controller\Api;
 use App\Entity\Book;
 use App\Entity\Order;
 use App\Enum\EntityGroupsEnum;
+use App\Event\BeforeUpdateOrderEvent;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -76,6 +77,9 @@ class OrdersController extends BaseController
      */
     public function update(Request $request, Order $order): Response
     {
+        $event = new BeforeUpdateOrderEvent($this->getUser(), $request);
+        $this->eventDispatcher->dispatch($event, 'order.pre_update');
+
         $order = $this->serializer->deserialize(
             $request->getContent(),
             Order::class,

@@ -9,7 +9,7 @@ use App\Repository\OrderRepository;
 use App\Service\PaginatorService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -60,6 +60,11 @@ class BaseController extends AbstractController
     protected $response;
 
     /**
+     * @var EventDispatcherInterface
+     */
+    protected $eventDispatcher;
+
+    /**
      * @param BookRepository $bookRepository
      * @param AuthorRepository $authorRepository
      * @param OrderRepository $orderRepository
@@ -67,6 +72,7 @@ class BaseController extends AbstractController
      * @param Serializer $serializer
      * @param ValidatorInterface $validator
      * @param PaginatorService $paginator
+     * @param EventDispatcherInterface $eventDispatcher
      */
     public function __construct(
         BookRepository         $bookRepository,
@@ -75,7 +81,8 @@ class BaseController extends AbstractController
         EntityManagerInterface $manager,
         SerializerInterface    $serializer,
         ValidatorInterface     $validator,
-        PaginatorService       $paginator
+        PaginatorService       $paginator,
+        EventDispatcherInterface $eventDispatcher
     )
     {
 
@@ -86,6 +93,7 @@ class BaseController extends AbstractController
         $this->authorRepository = $authorRepository;
         $this->orderRepository = $orderRepository;
         $this->paginator = $paginator;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
 

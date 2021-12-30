@@ -23,19 +23,16 @@ class ExceptionOrderTest extends TestCase
 
         $errors = $this->validator->validate($order, null, ["Default"]);
 
-        if($errors->has(0)) {
+        $this->assertEquals($expectedCountErrors, $errors->count());
+
+        if ($expectedCountErrors) {
             $message = $errors->get(0)->getMessage();
             $this->assertSame($expextedMessage, $message);
-            $this->assertEquals($expectedCountErrors, $errors->count());
-        } else {
-            $this->assertSame($expextedMessage, "");
-            $this->assertEquals($expectedCountErrors, 0);
         }
     }
 
 
-    public function
-    orderInvalidDataProvider(): iterable
+    public function orderInvalidDataProvider(): iterable
     {
         return [
             [
