@@ -9,6 +9,8 @@ class UpdateBookTest extends BooksTest
      */
     public function testUpdate($title, $description, $type)
     {
+        self::$bookDataForUpdate["authors"] = [$this->getLastAuthorId()];
+
         self::$client->request(
             "PUT",
             "/api/books/{$this->getLastBookId()}",
@@ -31,6 +33,43 @@ class UpdateBookTest extends BooksTest
         $this->assertSame($type, $changedContent['data']['type']);
     }
 
+    /**
+     * @dataProvider bookUpdateUnsuccessfulDataProvider
+     */
+    public function testUpdateUnsuccessful(
+        $withAuthor,
+        $withToken,
+        $withNonExistentAuthor,
+        $responseCode,
+        $message
+    ) {
+        if($withAuthor) {
+            self::$bookDataForUpdate["authors"] = [$this->getLastAuthorId()];
+        } elseif ($withNonExistentAuthor) {
+            self::$bookDataForUpdate["authors"] = [$this->getLastAuthorId() + 9999];
+        } else {
+            unset(self::$bookDataForUpdate["authors"]);
+        }
+
+        self::$client->request(
+            "PUT",
+            "/api/books/{$this->getLastBookId()}",
+            self::$bookDataForUpdate,
+            [],
+            ($withToken) ? self::$header : [],
+            json_encode(self::$bookDataForUpdate)
+        );
+
+        $content = json_decode(self::$client->getResponse()->getContent(), true);
+
+        $this->assertSame($responseCode, self::$client->getResponse()->getStatusCode());
+
+        if($responseCode != Response::HTTP_OK) {
+            $this->assertArrayHasKey("message", $content);
+            $this->assertSame($message, $content["message"]);
+        }
+    }
+
     public function bookUpdateDataProvider()
     {
         return [
@@ -38,6 +77,41 @@ class UpdateBookTest extends BooksTest
                 "title" => "Changed title",
                 "description" => "Changed description",
                 "type" => "prose"
+            ]
+        ];
+    }
+
+
+    public function bookUpdateUnsuccessfulDataProvider()
+    {
+        return [
+            [
+                "withAuthor" => true,
+                "withToken" => true,
+                "withNonExistentAuthor" => false,
+                "responseCode" => Response::HTTP_OK,
+                "message" => ""
+            ],
+            [
+                "withAuthor" => true,
+                "withToken" => false,
+                "withNonExistentAuthor" => false,
+                "responseCode" => Response::HTTP_UNAUTHORIZED,
+                "message" => "JWT Token not found"
+            ],
+            [
+                "withAuthor" => false,
+                "withToken" => true,
+                "withNonExistentAuthor" => false,
+                "responseCode" => Response::HTTP_BAD_REQUEST,
+                "message" => "The book must contain at least one author ID"
+            ],
+            [
+                "withAuthor" => false,
+                "withToken" => true,
+                "withNonExistentAuthor" => true,
+                "responseCode" => Response::HTTP_NOT_FOUND,
+                "message" => "Object with this ID not found"
             ]
         ];
     }

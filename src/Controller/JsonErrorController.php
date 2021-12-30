@@ -11,8 +11,10 @@ class JsonErrorController extends AbstractController
     {
 
         $error = [
-            "error" => $exception->getMessage()
+            "message" => $exception->getMessage()
         ];
+
+       //var_dump($this->json($error));
 
         return  $this->json($error);
     }

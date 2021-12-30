@@ -1,7 +1,6 @@
 <?php
 
 use App\Entity\Book;
-use App\Service\PaginatorService;
 use Symfony\Component\HttpFoundation\Response;
 
 class ListBookTest extends BooksTest
@@ -44,32 +43,26 @@ class ListBookTest extends BooksTest
      * Tests the api edit form
      * @dataProvider paginatorDataProvider
      */
-    public function testPaginate($lastPage, $countLastPageBooks)
+    public function testPaginate($page, $count)
     {
         self::$client->request(
             "GET",
-            "/api/books?page=1"
+            "/api/books?page={$page}"
         );
         $content = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
-        $this->assertCount(PaginatorService::ITEMS_PER_PAGE, $content['data']);
-
-        self::$client->request(
-            "GET",
-            "/api/books?page=4",
-            ["page" => $lastPage]
-        );
-
-        $lastPageContent = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
-
-        $this->assertCount($countLastPageBooks, $lastPageContent['data']);
+        $this->assertCount($count, $content['data']);
     }
 
     public function paginatorDataProvider()
     {
         return [
             [
-                "lastPage" => 4,
-                "countLastPageBooks" => 2
+                "page" => 1,
+                "count" => 3
+            ],
+            [
+                "page" => 4,
+                "count" => 2
             ]
         ];
     }

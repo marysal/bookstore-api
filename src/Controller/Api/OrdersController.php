@@ -7,6 +7,7 @@ use App\Entity\Order;
 use App\Enum\EntityGroupsEnum;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
@@ -34,11 +35,12 @@ class OrdersController extends BaseController
         $order = $this->serializer->deserialize($request->getContent(), Order::class, 'json');
         $books = $request->get('books', []);
 
-        $this->validate($books);
-
-       /* if(empty($books)) {
-            throw $this->createNotFoundException('The order must contain at least one book ID');
-        }*/
+        if(empty($books)) {
+            throw new HttpException(
+                Response::HTTP_BAD_REQUEST,
+                "The order must contain at least one book ID"
+            );
+        }
 
         foreach ($books as $bookId) {
             $bookId = (int) $bookId;

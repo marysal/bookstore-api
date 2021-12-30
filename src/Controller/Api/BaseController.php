@@ -11,6 +11,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -142,7 +143,8 @@ class BaseController extends AbstractController
         $errors = $this->validator->validate($entity);
 
         if ($errors->has(0)) {
-            throw $this->createNotFoundException(
+            throw new HttpException(
+                Response::HTTP_BAD_REQUEST,
                 $errors->get(0)->getPropertyPath(). ": ".$errors->get(0)->getMessage()
             );
         }

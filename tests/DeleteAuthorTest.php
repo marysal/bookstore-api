@@ -15,6 +15,15 @@ class DeleteAuthorTest extends BaseTest
         );
 
         $this->assertSame(Response::HTTP_OK, self::$client->getResponse()->getStatusCode());
+
+        $author = $this->em->createQuery(
+            'SELECT a FROM App\Entity\Author a
+             WHERE a.id = :id'
+        )
+        ->setParameter('id', $this->getLastAuthorId())
+        ->execute();
+
+        $this->assertEmpty($author);
     }
 
     protected function tearDown(): void

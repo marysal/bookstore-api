@@ -15,6 +15,15 @@ class DeleteBookTest extends BooksTest
         );
 
         $this->assertSame(Response::HTTP_OK, self::$client->getResponse()->getStatusCode());
+
+        $book = $this->em->createQuery(
+            'SELECT b FROM App\Entity\Book b
+             WHERE b.id = :id'
+        )
+        ->setParameter('id', $this->getLastBookId())
+        ->execute();
+
+        $this->assertEmpty($book);
     }
 
     protected function tearDown(): void

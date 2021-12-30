@@ -15,6 +15,15 @@ class DeleteOrderTest extends BaseTest
         );
 
         $this->assertSame(Response::HTTP_OK, self::$client->getResponse()->getStatusCode());
+
+        $author = $this->em->createQuery(
+            'SELECT o FROM App\Entity\Order o
+             WHERE o.id = :id'
+        )
+        ->setParameter('id', $this->getLastOrderId())
+        ->execute();
+
+        $this->assertEmpty($author);
     }
 
     protected function tearDown(): void

@@ -7,6 +7,7 @@ use App\Entity\Book;
 use App\Enum\EntityGroupsEnum;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
@@ -41,6 +42,13 @@ class BooksController extends BaseController
     {
         $book = $this->serializer->deserialize($request->getContent(), Book::class, 'json');
         $authors = $request->get('authors', []);
+
+        if(empty($authors)) {
+            throw new HttpException(
+                Response::HTTP_BAD_REQUEST,
+                "The book must contain at least one author ID"
+            );
+        }
 
         foreach ($authors as $authorId) {
             $authorId = (int)$authorId;
@@ -87,6 +95,13 @@ class BooksController extends BaseController
         );
 
         $authors = $request->get('authors', []);
+
+        if(empty($authors)) {
+            throw new HttpException(
+                Response::HTTP_BAD_REQUEST,
+                "The book must contain at least one author ID"
+            );
+        }
 
         foreach ($authors as $authorId) {
             $authorId = (int)$authorId;
