@@ -9,10 +9,13 @@ use App\Repository\OrderRepository;
 use App\Service\PaginatorService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class BaseController extends AbstractController
 {
@@ -50,6 +53,10 @@ class BaseController extends AbstractController
      * @var PaginatorService
      */
     protected $paginator;
+    /**
+     * @var ResponseInterface
+     */
+    protected $response;
 
     /**
      * @param BookRepository $bookRepository
@@ -80,6 +87,7 @@ class BaseController extends AbstractController
         $this->paginator = $paginator;
     }
 
+
     /**
      * @param $data
      * @param string $typeJsonContent
@@ -101,16 +109,35 @@ class BaseController extends AbstractController
     }
 
     /**
+     * @param $data
+     * @param string $typeJsonContent
+     * @return string
+     */
+    private function getSerializedContent($data, string $format = "json", string $typeJsonContent = "books"): string
+    {
+        $group = EntityGroupsEnum::getEntityGroupsList();
+
+        return $this->serializer->serialize(
+            [
+                'data' => $data
+            ],
+            $format,
+            [
+                'groups' => $group[$typeJsonContent]
+            ]
+        );
+    }
+
+    /**
      * @param $entity
      * @throws NotFoundHttpException
      * @return bool|null
      */
-    protected function validate($entity): void
+    protected function validate($entity, $typeValidate = "existanceEntity"): void
     {
-        if (empty($entity)) {
+        if (empty($entity) && $typeValidate == "existanceEntity") {
             throw $this->createNotFoundException('Object with this ID not found');
         }
-
 
         $errors = $this->validator->validate($entity);
 
@@ -119,5 +146,17 @@ class BaseController extends AbstractController
                 $errors->get(0)->getPropertyPath(). ": ".$errors->get(0)->getMessage()
             );
         }
+    }
+
+    protected function response($data = [], $contentType = "json"): Response
+    {
+        $response = new Response();
+        $response->setContent($this->getSerializedContent(
+            $data,
+            $contentType
+        ));
+        $response->headers->set('Content-Type', "application/{$contentType}");
+
+        return $response;
     }
 }

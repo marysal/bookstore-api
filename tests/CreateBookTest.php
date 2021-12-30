@@ -4,11 +4,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CreateBookTest extends BooksTest
 {
-    protected function setUp(): void
-    {
-        $this->setAuthor();
-    }
-
     /**
      * @dataProvider bookDataProvider
      */
@@ -55,12 +50,11 @@ class CreateBookTest extends BooksTest
 
     protected function tearDown(): void
     {
-        self::$client->request(
-            "DELETE",
-            "/api/books/{$this->getLastBookId()}",
-            [],
-            [],
-            self::$header
-        );
+        $this->em->createQuery(
+            'DELETE FROM App\Entity\Book b
+             WHERE b.id = :id'
+        )
+        ->setParameter('id', $this->getLastBookId())
+        ->execute();
     }
 }

@@ -19,20 +19,18 @@ class DeleteOrderTest extends BaseTest
 
     protected function tearDown(): void
     {
-        self::$client->request(
-            "DELETE",
-            "/api/books/{$this->getLastBookId()}",
-            [],
-            [],
-            self::$header
-        );
+        $this->em->createQuery(
+            'DELETE FROM App\Entity\Book b
+             WHERE b.id = :id'
+        )
+        ->setParameter('id', $this->getLastBookId())
+        ->execute();
 
-        self::$client->request(
-            "DELETE",
-            "/api/authors/{$this->getLastAuthorId()}",
-            [],
-            [],
-            self::$header
-        );
+        $this->em->createQuery(
+            'DELETE FROM App\Entity\Author a
+             WHERE a.id = :id'
+        )
+        ->setParameter('id', $this->getLastAuthorId())
+        ->execute();
     }
 }

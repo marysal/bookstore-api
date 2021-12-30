@@ -28,6 +28,8 @@ class CreateOrderTestTest extends BaseTest
         $this->assertSame($address, $content["data"]["address"]);
         $this->assertSame($phone, $content["data"]["phone"]);
         $this->assertSame($status, $content["data"]["status"]);
+
+        $this->lastOrderId = $content['data']['id'];
     }
 
     public function orderDataProvider()
@@ -39,5 +41,15 @@ class CreateOrderTestTest extends BaseTest
                 "status" => StatusesOrdersEnum::STATUS_PENDING
             ]
         ];
+    }
+
+    protected function tearDown(): void
+    {
+        $this->em->createQuery(
+            'DELETE FROM App\Entity\Order o
+             WHERE o.id = :id'
+        )
+        ->setParameter('id', $this->getLastOrderId())
+        ->execute();
     }
 }

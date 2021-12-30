@@ -31,10 +31,10 @@ class UpdateOrderTest extends BaseTest
 
         $this->assertSame(Response::HTTP_OK, self::$client->getResponse()->getStatusCode());
         $this->assertNotEmpty($changedOrder);
-        $this->assertSame($order['data']['id'], $changedOrder['data']['id']);
+        $this->assertSame($order->getId(), $changedOrder['data']['id']);
         $this->assertArrayHasKey("phone", $changedOrder['data']);
-        $this->assertNotEquals($phone, $order['data']['phone']);
-        $this->assertNotEquals($address, $order['data']['address']);
+        $this->assertNotEquals($phone, $order->getPhone());
+        $this->assertNotEquals($address, $order->getAddress());
     }
 
     public function orderUpdateDataProvider()

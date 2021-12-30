@@ -27,6 +27,11 @@ class BooksController extends BaseController
                 $this->paginator->getPaginate($booksQuery, $page)
             ),
         );
+
+      /*  return $this->response(
+            $this->paginator->getPaginate($booksQuery, $page),
+            $request->getContentType()
+        );*/
     }
 
     /**

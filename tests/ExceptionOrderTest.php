@@ -27,11 +27,15 @@ class ExceptionOrderTest extends TestCase
             $message = $errors->get(0)->getMessage();
             $this->assertSame($expextedMessage, $message);
             $this->assertEquals($expectedCountErrors, $errors->count());
+        } else {
+            $this->assertSame($expextedMessage, "");
+            $this->assertEquals($expectedCountErrors, 0);
         }
     }
 
 
-    public function orderInvalidDataProvider(): iterable
+    public function
+    orderInvalidDataProvider(): iterable
     {
         return [
             [
@@ -57,7 +61,13 @@ class ExceptionOrderTest extends TestCase
                 "address" => "ff",
                 "This value is too short. It should have 5 characters or more.",
                 1
-            ]
+            ],
+            [
+                "phone" => "+375(29)257-12-11",
+                "address" => "Minsk, Leonardo Da Vinche str.",
+                "",
+                0
+            ],
         ];
     }
 }

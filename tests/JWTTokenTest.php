@@ -15,8 +15,8 @@ class JWTTokenTest extends BaseTest
           json_encode(["username" => "admin@admin.admin", "password" => "123456"])
       );
 
-        $content = json_decode(self::$client->getResponse()->getContent());
-        $this->assertSame(Response::HTTP_OK, self::$client->getResponse()->getStatusCode());
-        $this->assertNotEmpty($content->token);
+      $content = json_decode(self::$client->getResponse()->getContent());
+      $this->assertSame(Response::HTTP_OK, self::$client->getResponse()->getStatusCode());
+      $this->assertNotEmpty($content->token);
     }
 }

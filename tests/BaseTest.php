@@ -1,6 +1,8 @@
 <?php
 
+use App\Entity\Author;
 use App\Entity\Book;
+use App\Entity\Order;
 use App\Repository\BookRepository;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
@@ -39,9 +41,26 @@ class BaseTest extends WebTestCase
 
     protected $lastOrderId;
 
+    /**
+     * @var $em \Doctrine\ORM\EntityManagerInterface
+     */
+    protected $em;
+
+    /**
+     * @var $serializer \Symfony\Component\Serializer\Serializer
+     */
+    protected $serializer;
+
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->em = self::$client->getContainer()
+            ->get("doctrine.orm.entity_manager");
+
+        $this->serializer = self::$client->getContainer()
+            ->get("serializer");
+
         $this->setAuthor();
         $this->setBook();
         $this->setOrder();
@@ -94,18 +113,20 @@ class BaseTest extends WebTestCase
 
     protected function setAuthor()
     {
-        self::$client->request(
-            "POST",
-            "/api/authors/create",
-            self::$singleAuthor,
-            [],
-            self::$header,
-            json_encode(self::$singleAuthor)
+        /**
+         * @var $author Author
+         */
+        $author = $this->serializer->deserialize(
+            json_encode(self::$singleAuthor),
+            Author::class,
+            'json'
         );
 
-        $this->author = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
+        $this->em->persist($author);
+        $this->em->flush();
 
-        $this->lastAuthorId = $this->author['data']['id'];
+        $this->author = $author;
+        $this->lastAuthorId = $author->getId();
     }
 
     /**
@@ -126,20 +147,16 @@ class BaseTest extends WebTestCase
 
     private function setBook(): void
     {
-        self::$singleBook["authors"] = [$this->getLastAuthorId()];
+        /**
+         * @var $book Book
+         */
+        $book = $this->serializer->deserialize(json_encode(self::$singleBook), Book::class, 'json');
+        $book->appendAuthor($this->getAuthor());
+        $this->em->persist($book);
+        $this->em->flush();
 
-        self::$client->request(
-            "POST",
-            "/api/books/create",
-            self::$singleBook,
-            [],
-            self::$header,
-            json_encode(self::$singleBook)
-        );
-
-        $this->book = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
-
-        $this->lastBookId = $this->book['data']['id'];
+        $this->book = $book;
+        $this->lastBookId = $book->getId();
     }
 
     /**
@@ -152,20 +169,21 @@ class BaseTest extends WebTestCase
 
     private function setOrder()
     {
-        self::$singleOrder["books"] = [$this->getLastBookId()];
-
-        self::$client->request(
-            "POST",
-            "/api/orders/create",
-            self::$singleOrder,
-            [],
-            self::$header,
-            json_encode(self::$singleOrder)
+        /**
+         * @var $order Order
+         */
+        $order = $this->serializer->deserialize(
+            json_encode(self::$singleOrder),
+            Order::class,
+            'json'
         );
+        $order->appendBookOrderList($this->getBook());
 
-        $this->order = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
+        $this->em->persist($order);
+        $this->em->flush();
 
-        $this->lastOrderId = $this->order['data']['id'];
+        $this->order = $order;
+        $this->lastOrderId = $order->getId();
     }
 
     /**
@@ -194,28 +212,25 @@ class BaseTest extends WebTestCase
 
     protected function tearDown(): void
     {
-        self::$client->request(
-            "DELETE",
-            "/api/books/{$this->getLastBookId()}",
-            [],
-            [],
-            self::$header
-        );
+        $this->em->createQuery(
+            'DELETE FROM App\Entity\Book b
+             WHERE b.id = :id'
+        )
+        ->setParameter('id', $this->getLastBookId())
+        ->execute();
 
-        self::$client->request(
-            "DELETE",
-            "/api/authors/{$this->getLastAuthorId()}",
-            [],
-            [],
-            self::$header
-        );
+        $this->em->createQuery(
+            'DELETE FROM App\Entity\Author a
+             WHERE a.id = :id'
+        )
+        ->setParameter('id', $this->getLastAuthorId())
+        ->execute();
 
-        self::$client->request(
-            "DELETE",
-            "/api/orders/{$this->getLastOrderId()}",
-            [],
-            [],
-            self::$header
-        );
+        $this->em->createQuery(
+            'DELETE FROM App\Entity\Order o
+             WHERE o.id = :id'
+        )
+        ->setParameter('id', $this->getLastOrderId())
+        ->execute();
     }
 }

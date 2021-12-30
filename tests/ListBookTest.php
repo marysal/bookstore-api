@@ -1,5 +1,6 @@
 <?php
 
+use App\Entity\Book;
 use App\Service\PaginatorService;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -15,15 +16,14 @@ class ListBookTest extends BooksTest
             ->execute();
 
         foreach (range(1, 11) as $row) {
-            self::$client->request(
-                "POST",
-                "/api/books/create",
-                self::$singleBook,
-                [],
-                self::$header,
-                json_encode(self::$singleBook)
-            );
+            /**
+             * @var $book Book
+             */
+            $book = $this->serializer->deserialize(json_encode(self::$singleBook), Book::class, 'json');
+            $book->appendAuthor($this->getAuthor());
+            $this->em->persist($book);
         }
+        $this->em->flush();
     }
 
     public function testList()

@@ -19,20 +19,18 @@ class DeleteBookTest extends BooksTest
 
     protected function tearDown(): void
     {
-        self::$client->request(
-            "DELETE",
-            "/api/authors/{$this->getLastAuthorId()}",
-            [],
-            [],
-            self::$header
-        );
+        $this->em->createQuery(
+            'DELETE FROM App\Entity\Author a
+             WHERE a.id = :id'
+        )
+        ->setParameter('id', $this->getLastAuthorId())
+        ->execute();
 
-        self::$client->request(
-            "DELETE",
-            "/api/orders/{$this->getLastOrderId()}",
-            [],
-            [],
-            self::$header
-        );
+        $this->em->createQuery(
+            'DELETE FROM App\Entity\Order o
+             WHERE o.id = :id'
+        )
+        ->setParameter('id', $this->getLastOrderId())
+        ->execute();
     }
 }

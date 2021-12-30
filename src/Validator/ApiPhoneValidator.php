@@ -19,7 +19,7 @@ class ApiPhoneValidator extends ConstraintValidator
     {
         if(empty($_ENV['NUM_VERIFY_API_URL']) || empty($_ENV['NUM_VERIFY_API_KEY'])) {
             throw new HttpException(
-               Response::HTTP_UNPROCESSABLE_ENTITY,
+               Response::HTTP_INTERNAL_SERVER_ERROR,
                 "There is no url or key to connect to numverify api"
             );
         }

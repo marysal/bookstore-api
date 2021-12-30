@@ -50,13 +50,13 @@ class CreateAuthorTest extends BaseTest
 
     protected function tearDown(): void
     {
-        self::$client->request(
-            "DELETE",
-            "/api/authors/{$this->getLastAuthorId()}",
-            [],
-            [],
-            self::$header
-        );
+        $query = $this->em->createQuery(
+            'DELETE FROM App\Entity\Author a
+             WHERE a.id = :id'
+        )
+        ->setParameter('id', $this->getLastAuthorId());
+
+        $query->execute();
     }
 
 }
