@@ -88,8 +88,9 @@ class BooksController extends BaseController
 
         $this->saveToDb($updatedBook);
 
-        return $this->json(
-            $this->getJsonContent($updatedBook)
+        return $this->response(
+            $updatedBook,
+            $request->getAcceptableContentTypes()
         );
     }
 

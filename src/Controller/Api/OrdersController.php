@@ -64,6 +64,32 @@ class OrdersController extends BaseController
     }
 
     /**
+     * @Route("/api/orders/{id}", name="app_api_order_path_update", methods={"PATCH"})
+     */
+    public function partialUpdate(Request $request, Order $order): Response
+    {
+        $updatedData = $this->applyJsonPath($order, $request);
+
+        $updatedOrder = $this->serializer->deserialize(
+            json_encode($updatedData),
+            Book::class,
+            'json',
+            [
+                AbstractNormalizer::OBJECT_TO_POPULATE => $order
+            ],
+        );
+
+        $this->validate($updatedOrder);
+
+        $this->saveToDb($updatedOrder);
+
+        return $this->response(
+            $updatedOrder,
+            $request->getAcceptableContentTypes()
+        );
+    }
+
+    /**
      * @Route("/api/orders/{id}", name="app_api_order_update", methods={"PUT"})
      */
     public function update(Request $request, Order $order): Response
