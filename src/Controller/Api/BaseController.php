@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Enum\EntityGroupsEnum;
+use App\Enum\ResponseContentTypesEnum;
 use App\Repository\AuthorRepository;
 use App\Repository\BookRepository;
 use App\Repository\OrderRepository;
@@ -10,6 +11,7 @@ use App\Service\PaginatorService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -158,15 +160,73 @@ class BaseController extends AbstractController
         }
     }
 
-    protected function response($data = [], $contentType = "json"): Response
-    {
+    /**
+     * @param object|array $data
+     * @param array|string[] $acceptableContentTypes
+     * @param string|int $responseStatus
+     * @return Response
+     */
+    protected function response(
+        $data = [],
+        array $acceptableContentTypes = ["json"],
+        string $responseStatus = Response::HTTP_OK
+    ): Response {
+
+        $contentType = $this->getContentType($acceptableContentTypes);
+
         $response = new Response();
+
         $response->setContent($this->getSerializedContent(
             $data,
             $contentType
         ));
+
+        $response->setStatusCode($responseStatus);
         $response->headers->set('Content-Type', "application/{$contentType}");
 
         return $response;
+    }
+
+    /**
+     * @param $acceptableContentTypes
+     * @return string
+     */
+    public function getContentType($acceptableContentTypes): string
+    {
+        $contentType = "json";
+
+        foreach ($acceptableContentTypes as $contentType) {
+            if(!in_array($contentType, ResponseContentTypesEnum::getContentTypesList())) {
+                continue;
+            }
+
+            return str_replace("application/", "", $contentType);
+        }
+
+        return $contentType;
+    }
+
+    /**
+     * @param Request $request
+     * @param string $tableName
+     * @return string[]
+     */
+    protected function getIdsForLinkedTable(
+        Request $request,
+        string $tableName = "authors"
+    ): array {
+        $ids = $request->get($tableName, []);
+
+        if($request->getContentType() == "xml") {
+            $xml = simplexml_load_string($request->getContent(), "SimpleXMLElement", LIBXML_NOCDATA);
+            $json = json_encode($xml);
+            $authors = json_decode($json,true);
+            $ids = $authors[$tableName]["id"];
+            if(is_string($ids)) {
+                $ids = [$ids];
+            }
+        }
+
+        return $ids;
     }
 }

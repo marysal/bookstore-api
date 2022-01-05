@@ -14,7 +14,7 @@ class BeforeUpdateOrderSubscriber implements EventSubscriberInterface
         if(!$event->getIsAdmin() && !empty($event->getStatus())) {
             throw new HttpException(
                 Response::HTTP_UNAUTHORIZED,
-                "Invalid credentials."
+                "Only admin can change order status."
             );
         }
     }

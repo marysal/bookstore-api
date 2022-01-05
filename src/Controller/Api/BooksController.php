@@ -4,15 +4,21 @@ namespace App\Controller\Api;
 
 use App\Entity\Author;
 use App\Entity\Book;
-use App\Enum\EntityGroupsEnum;
+use App\Traits\EntityManagerTrait;
+use App\Traits\JsonPathTrait;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 class BooksController extends BaseController
 {
+    protected $relationEntity = Author::class;
+    protected $entityName = "book";
+
+    use EntityManagerTrait;
+    use JsonPathTrait;
+
     /**
      * @Route("/api/books", name="app_api_books_list", methods={"GET"})
      */
@@ -23,16 +29,10 @@ class BooksController extends BaseController
 
         $booksQuery = $this->bookRepository->getQueryByFields($params);
 
-        return $this->json(
-            $this->getJsonContent(
-                $this->paginator->getPaginate($booksQuery, $page)
-            ),
-        );
-
-      /*  return $this->response(
+        return $this->response(
             $this->paginator->getPaginate($booksQuery, $page),
-            $request->getContentType()
-        );*/
+            $request->getAcceptableContentTypes()
+        );
     }
 
     /**
@@ -40,30 +40,23 @@ class BooksController extends BaseController
      */
     public function create(Request $request): Response
     {
-        $book = $this->serializer->deserialize($request->getContent(), Book::class, 'json');
-        $authors = $request->get('authors', []);
+        $book = $this->serializer->deserialize(
+            $request->getContent(),
+            Book::class,
+            $request->getContentType()
+        );
 
-        if(empty($authors)) {
-            throw new HttpException(
-                Response::HTTP_BAD_REQUEST,
-                "The book must contain at least one author ID"
-            );
-        }
+        $authors = $this->getIdsForLinkedTable($request);
 
-        foreach ($authors as $authorId) {
-            $authorId = (int)$authorId;
-            $author = $this->entityManager->find(Author::class, $authorId);
-            $this->validate($author);
-            $book->appendAuthor($author);
-        }
+        $this->setEntityRelations($book, $authors);
 
         $this->validate($book);
 
-        $this->entityManager->persist($book);
-        $this->entityManager->flush();
+        $this->saveToDb($book);
 
-        return $this->json(
-            $this->getJsonContent($book),
+        return $this->response(
+            $book,
+            $request->getAcceptableContentTypes(),
             Response::HTTP_CREATED
         );
     }
@@ -72,10 +65,36 @@ class BooksController extends BaseController
      *
      * @Route("/api/books/{id}", name="app_api_book_show", methods={"GET"})
      */
-    public function show(Book $book): Response
+    public function show(Request $request, Book $book): Response
     {
+        return $this->response(
+            $book,
+            $request->getAcceptableContentTypes()
+        );
+    }
+
+    /**
+     * @Route("/api/books/{id}", name="app_api_book_path_update", methods={"PATCH"})
+     */
+    public function partialUpdate(Request $request, Book $book): Response
+    {
+        $updatedData = $this->applyJsonPath($book, $request);
+
+        $updatedBook = $this->serializer->deserialize(
+            json_encode($updatedData),
+            Book::class,
+            'json',
+            [
+                AbstractNormalizer::OBJECT_TO_POPULATE => $book
+            ],
+        );
+
+        $this->validate($updatedBook);
+
+        $this->saveToDb($updatedBook);
+
         return $this->json(
-            $this->getJsonContent($book)
+            $this->getJsonContent($updatedBook)
         );
     }
 
@@ -88,50 +107,36 @@ class BooksController extends BaseController
         $book = $this->serializer->deserialize(
             $request->getContent(),
             Book::class,
-            'json',
+            $request->getContentType(),
             [
                 AbstractNormalizer::OBJECT_TO_POPULATE => $book
             ],
         );
 
-        $authors = $request->get('authors', []);
+        $authors = $this->getIdsForLinkedTable($request);
 
-        if(empty($authors)) {
-            throw new HttpException(
-                Response::HTTP_BAD_REQUEST,
-                "The book must contain at least one author ID"
-            );
-        }
-
-        foreach ($authors as $authorId) {
-            $authorId = (int)$authorId;
-            $author = $this->entityManager->find(Author::class, $authorId);
-            $this->validate($author);
-            $book->appendAuthor($author);
-        }
+        $this->setEntityRelations($book, $authors);
 
         $this->validate($book);
 
-        $this->entityManager->persist($book);
-        $this->entityManager->flush();
+        $this->saveToDb($book);
 
-        return $this->json(
-            $this->getJsonContent($book)
+        return $this->response(
+            $book,
+            $request->getAcceptableContentTypes()
         );
     }
 
     /**
      * @Route("/api/books/{id}", name="app_api_book_destroy", methods={"DELETE"})
      */
-    public function destroy(Book $book): Response
+    public function destroy(Request $request, Book $book): Response
     {
-        //var_dump($book);
-        $manager = $this->getDoctrine()->getManager();
-        $manager->remove($book);
-        $manager->flush();
+        $this->saveToDb($book, "remove");
 
-        return $this->json(
-            $this->getJsonContent([], EntityGroupsEnum::ENTITY_DELETED)
+        return $this->response(
+            [],
+            $request->getAcceptableContentTypes()
         );
     }
 }

@@ -69,7 +69,7 @@ class UpdateOrderTest extends BaseTest
                 "status" => StatusesOrdersEnum::STATUS_DELIVERED,
                 "withToken" => false,
                 "responseCode" => Response::HTTP_UNAUTHORIZED,
-                "message" => "Invalid credentials."
+                "message" => "Only admin can change order status."
             ]
         ];
     }

@@ -8,7 +8,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class BaseTest extends WebTestCase
 {
-    protected static $singleAuthor =   [
+    protected static $singleAuthor = [
         "name" => "Fedor Dostojevskij"
     ];
 

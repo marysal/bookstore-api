@@ -66,7 +66,6 @@ class OrdersController extends BaseController
      */
     public function show(Order $order): Response
     {
-
         return $this->json(
             $this->getJsonContent($order, "orders")
         );

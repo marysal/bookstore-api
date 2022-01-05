@@ -32,6 +32,7 @@ class UpdateAuthorTest extends BaseTest
         return [
             [
                 "name" => "Updated author",
+                "responseStatus" => Response::HTTP_OK
             ]
         ];
     }

@@ -258,6 +258,9 @@
             "config/packages/sensio_framework_extra.yaml"
         ]
     },
+    "swaggest/json-diff": {
+        "version": "v3.8.3"
+    },
     "symfony-bundles/json-request-bundle": {
         "version": "v3.1.1"
     },

@@ -24,7 +24,6 @@ class ApiPhoneValidator extends ConstraintValidator
             );
         }
 
-
         $this->client = $client;
     }
 
