@@ -8,6 +8,8 @@ use App\Repository\AuthorRepository;
 use App\Repository\BookRepository;
 use App\Repository\OrderRepository;
 use App\Service\PaginatorService;
+use App\Traits\EntityManagerTrait;
+use App\Traits\JsonPathTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -22,6 +24,9 @@ use Symfony\Contracts\HttpClient\ResponseInterface;
 
 class BaseController extends AbstractController
 {
+    use EntityManagerTrait;
+    use JsonPathTrait;
+
     /**
      * @var EntityManagerInterface
      */

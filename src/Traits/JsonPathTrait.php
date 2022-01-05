@@ -13,7 +13,7 @@ trait JsonPathTrait
      * @param Request $request
      * @return object
      */
-    private function applyJsonPath(object $entity, Request $request): object
+    protected function applyJsonPath(object $entity, Request $request): object
     {
         $original = json_decode($this->json($entity)->getContent());
         $patch = JsonPatch::import(json_decode($request->getContent()));

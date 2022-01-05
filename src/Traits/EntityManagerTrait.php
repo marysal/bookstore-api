@@ -7,7 +7,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 trait EntityManagerTrait
 {
-    private function setEntityRelations(
+    protected function setEntityRelations(
         object $entity,
         array $idsRelations = []
     ) : void {
@@ -27,7 +27,7 @@ trait EntityManagerTrait
         }
     }
 
-    private function saveToDb($entity, $op = "persist"): void
+    protected function saveToDb($entity, $op = "persist"): void
     {
         $this->entityManager->{$op}($entity);
         $this->entityManager->flush();

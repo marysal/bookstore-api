@@ -4,8 +4,6 @@ namespace App\Controller\Api;
 
 use App\Entity\Author;
 use App\Entity\Book;
-use App\Traits\EntityManagerTrait;
-use App\Traits\JsonPathTrait;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -15,9 +13,6 @@ class BooksController extends BaseController
 {
     protected $relationEntity = Author::class;
     protected $entityName = "book";
-
-    use EntityManagerTrait;
-    use JsonPathTrait;
 
     /**
      * @Route("/api/books", name="app_api_books_list", methods={"GET"})

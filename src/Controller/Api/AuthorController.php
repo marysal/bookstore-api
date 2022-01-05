@@ -3,7 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Entity\Author;
-use App\Enum\EntityGroupsEnum;
+use App\Entity\Book;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -11,6 +11,9 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 class AuthorController extends BaseController
 {
+    protected $relationEntity = Book::class;
+    protected $entityName = "author";
+
     /**
      * @Route("/api/authors", name="app_api_authors_list", methods={"GET"})
      */
@@ -20,10 +23,9 @@ class AuthorController extends BaseController
 
         $authors = $this->authorRepository->findByFields($params);
 
-        return $this->json(
-            $this->getJsonContent(
-                $this->getJsonContent($authors, EntityGroupsEnum::ENTITY_AUTHORS)
-            )
+        return $this->response(
+            $authors,
+            $request->getAcceptableContentTypes()
         );
     }
 
@@ -35,22 +37,16 @@ class AuthorController extends BaseController
         $author = $this->serializer->deserialize(
             $request->getContent(),
             Author::class,
-            'json'
+            $request->getContentType()
         );
 
-        $errors = $this->validator->validate($author);
+        $this->validate($author);
 
-        if ($errors->has(0)) {
-            throw $this->createNotFoundException(
-                $errors->get(0)->getMessage()
-            );
-        }
+        $this->saveToDb($author);
 
-        $this->entityManager->persist($author);
-        $this->entityManager->flush();
-
-        return $this->json(
-            $this->getJsonContent($author, EntityGroupsEnum::ENTITY_AUTHORS),
+        return $this->response(
+            $author,
+            $request->getAcceptableContentTypes(),
             Response::HTTP_CREATED
         );
     }
@@ -58,10 +54,11 @@ class AuthorController extends BaseController
     /**
      * @Route("/api/authors/{id}", name="app_api_author_show", methods={"GET"})
      */
-    public function show(Author $author): Response
+    public function show(Request $request, Author $author): Response
     {
-        return $this->json(
-            $this->getJsonContent($author)
+        return $this->response(
+            $author,
+            $request->getAcceptableContentTypes()
         );
     }
 
@@ -73,7 +70,7 @@ class AuthorController extends BaseController
         $author = $this->serializer->deserialize(
             $request->getContent(),
             Author::class,
-            'json',
+            $request->getContentType(),
             [
                 AbstractNormalizer::OBJECT_TO_POPULATE => $author
             ],
@@ -81,25 +78,24 @@ class AuthorController extends BaseController
 
         $this->validate($author);
 
-        $this->entityManager->persist($author);
-        $this->entityManager->flush();
+        $this->saveToDb($author);
 
-        return $this->json(
-            $this->getJsonContent($author, EntityGroupsEnum::ENTITY_AUTHORS)
+        return $this->response(
+            $author,
+            $request->getAcceptableContentTypes()
         );
     }
 
     /**
      * @Route("/api/authors/{id}", name="app_api_author_destroy", methods={"DELETE"})
      */
-    public function destroy(Author $author): Response
+    public function destroy(Request $request, Author $author): Response
     {
-        $manager = $this->getDoctrine()->getManager();
-        $manager->remove($author);
-        $manager->flush();
+        $this->saveToDb($author, "remove");
 
-        return $this->json(
-            $this->getJsonContent([], EntityGroupsEnum::ENTITY_DELETED)
+        return $this->response(
+            [],
+            $request->getAcceptableContentTypes()
         );
     }
 }
