@@ -107,7 +107,6 @@ class AppFixtures extends Fixture
             $order->setPhone($this->phones[$randomPhoneIndex]);
             $this->orders[$i] = $order;
             $manager->persist($order);
-
         }
     }
 
