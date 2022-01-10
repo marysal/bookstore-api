@@ -33,6 +33,12 @@ class Order
     private $id;
 
     /**
+     * @ORM\Column(type="string", length=180, unique=false, nullable=true)
+     * @Assert\Email()
+     */
+    private $email;
+
+    /**
      * @Groups("order")
      * @ORM\Column(type="string", length=20, nullable=false)
      * @CustomAssert\PhoneConstraint()
@@ -198,5 +204,19 @@ class Order
         $this->status = $status;
     }
 
+    /**
+     * @param mixed $email
+     */
+    public function setEmail($email): void
+    {
+        $this->email = $email;
+    }
 
+    /**
+     * @return mixed
+     */
+    public function getEmail()
+    {
+        return $this->email;
+    }
 }

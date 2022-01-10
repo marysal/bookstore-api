@@ -14,6 +14,7 @@ class OrdersController extends BaseController
 {
     protected $relationEntity = Book::class;
     protected $entityName = "order";
+    protected $entityAddRelationMethodName  = "appendBookOrderList";
 
     /**
      * @Route("/api/orders", name="app_api_orders_list", methods={"GET"})

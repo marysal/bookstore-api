@@ -21,4 +21,9 @@ RUN apt-get update \
     && apt-get -y install git \
     && apt-get clean; rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
+# Install git
+RUN apt-get update \
+    && apt-get -y install sendmail \
+    && apt-get clean;
+
 RUN curl -s https://getcomposer.org/installer | php -- --install-dir=/bin --filename=composer --quiet

@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Entity\Book;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
@@ -23,7 +24,8 @@ trait EntityManagerTrait
             $id = (int)$id;
             $object = $this->entityManager->find($this->relationEntity, $id);
             $this->validate($object);
-            $entity->appendAuthor($object);
+            //$entity->appendAuthor($object);
+            $entity->{$this->entityAddRelationMethodName}($object);
         }
     }
 

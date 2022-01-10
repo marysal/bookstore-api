@@ -220,7 +220,7 @@ class BaseController extends AbstractController
         Request $request,
         string $tableName = "authors"
     ): array {
-        $ids = $request->get($tableName, []);
+        $ids = $request->get($tableName, [21]);
 
         if($request->getContentType() == "xml") {
             $xml = simplexml_load_string($request->getContent(), "SimpleXMLElement", LIBXML_NOCDATA);

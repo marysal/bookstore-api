@@ -15,6 +15,8 @@ class BeforeUpdateOrderEvent extends Event
 
     private $status;
 
+    private $email;
+
     private $isAdmin;
 
     /**
@@ -26,6 +28,7 @@ class BeforeUpdateOrderEvent extends Event
         $this->setUser($user);
         $this->setStatus($request);
         $this->setIsAdmin($user);
+        $this->setEmail($request);
     }
 
     /**
@@ -70,5 +73,22 @@ class BeforeUpdateOrderEvent extends Event
         }
 
         $this->isAdmin = $isAdmin;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    /**
+     * @param Request $request
+     */
+    private function setEmail(Request $request): void
+    {
+        $email = $request->get('email', null);
+        $this->email = $email;
     }
 }
