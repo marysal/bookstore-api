@@ -19,8 +19,14 @@ class ElasticSearchTest extends BaseTest
     /**
      * @dataProvider bookDataProvider
      */
-    public function testSearchSuccessful($title, $description, $type, $author, $searchParams)
-    {
+    public function testSearch(
+        $title,
+        $description,
+        $type,
+        $author,
+        $searchParamsSuccess,
+        $searchParamsUnsuccess
+    ) {
         self::$singleBook["authors"] = [$this->getLastAuthorId()];
 
         self::$client->request(
@@ -35,10 +41,10 @@ class ElasticSearchTest extends BaseTest
         self::$client->request(
             "GET",
             "/api/search",
-            $searchParams,
+            $searchParamsSuccess,
             [],
             self::$header,
-            json_encode($searchParams)
+            json_encode($searchParamsSuccess)
         );
 
         $content = json_decode(self::$client->getResponse()->getContent(), true);
@@ -48,6 +54,17 @@ class ElasticSearchTest extends BaseTest
         $this->assertSame($description, $content[0]['description']);
         $this->assertSame($type, $content[0]['type']);
         $this->assertSame($author, $content[0]['authors'][0]["name"]);
+
+        self::$client->request(
+            "GET",
+            "/api/search",
+            $searchParamsUnsuccess,
+            [],
+            self::$header,
+            json_encode($searchParamsUnsuccess)
+        );
+
+        $this->assertSame(Response::HTTP_NOT_FOUND, self::$client->getResponse()->getStatusCode());
     }
 
     public function bookDataProvider()
@@ -58,8 +75,11 @@ class ElasticSearchTest extends BaseTest
                 "description" => "Elastic description",
                 "type" => "poetry",
                 "author" => "Fedor Dostojevskij",
-                "searchParams" => [
+                "searchParamsSuccess" => [
                     "title" => "Elastic title"
+                ],
+                "searchParamsUnsuccess" => [
+                    "title" => "Unsuccess Unsuccess"
                 ]
             ],
             [
@@ -67,8 +87,11 @@ class ElasticSearchTest extends BaseTest
                 "description" => "Elastic description",
                 "type" => "poetry",
                 "author" => "Fedor Dostojevskij",
-                "searchParams" => [
+                "searchParamsSuccess" => [
                     "description" => "Elastic description"
+                ],
+                "searchParamsUnsuccess" => [
+                    "description" => "Unsuccess Unsuccess"
                 ]
             ],
             [
@@ -76,10 +99,14 @@ class ElasticSearchTest extends BaseTest
                 "description" => "Elastic description",
                 "type" => "poetry",
                 "author" => "Fedor Dostojevskij",
-                "searchParams" => [
+                "searchParamsSuccess" => [
                     "title" => "Elastic title",
                     "description" => "Elastic description",
                     "authors.name" => "Fedor Dostojevskij"
+                ],
+                "searchParamsUnsuccess" => [
+                    "title" => "Unsuccess Unsuccess",
+                    "description" => "Unsuccess Unsuccess"
                 ]
             ]
         ];

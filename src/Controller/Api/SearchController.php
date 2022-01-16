@@ -72,6 +72,10 @@ class SearchController extends BaseController
             }
         }
 
+        if (empty($books)) {
+            throw $this->createNotFoundException('Not Found');
+        }
+
         return $books;
     }
 }
