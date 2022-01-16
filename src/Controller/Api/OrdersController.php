@@ -36,6 +36,8 @@ class OrdersController extends BaseController
      */
     public function create(Request $request): Response
     {
+        $event = new BeforeUpdateOrderEvent($this->getUser(), $request);
+
         $order = $this->serializer->deserialize($request->getContent(), Order::class, 'json');
 
         $books = $this->getIdsForLinkedTable($request);
@@ -45,6 +47,8 @@ class OrdersController extends BaseController
         $this->validate($order);
 
         $this->saveToDb($order);
+
+        $this->eventDispatcher->dispatch($event, 'order.after_validate');
 
         return $this->response(
             $order,
@@ -112,6 +116,8 @@ class OrdersController extends BaseController
         $this->setEntityRelations($order, $books);
 
         $this->validate($order);
+
+        $this->eventDispatcher->dispatch($event, 'order.after_validate');
 
         $this->saveToDb($order);
 

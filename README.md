@@ -1,3 +1,10 @@
+#CRON
+
+crontab -e
+
+0 5 * * * /application/bin/console RemoveOldOrdersCommand
+
+
 # DOCKER-SYMFONY4
 
 Docker environment for a Symfony4 project with Nginx, PHP 7.3 and Postgresql 9.6

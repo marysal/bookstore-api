@@ -13,6 +13,7 @@ class BooksController extends BaseController
 {
     protected $relationEntity = Author::class;
     protected $entityName = "book";
+    protected $entityAddRelationMethodName  = "appendAuthor";
 
     /**
      * @Route("/api/books", name="app_api_books_list", methods={"GET"})
@@ -35,6 +36,7 @@ class BooksController extends BaseController
      */
     public function create(Request $request): Response
     {
+
         $book = $this->serializer->deserialize(
             $request->getContent(),
             Book::class,
@@ -49,11 +51,15 @@ class BooksController extends BaseController
 
         $this->saveToDb($book);
 
-        return $this->response(
+        $response = $this->response(
             $book,
             $request->getAcceptableContentTypes(),
             Response::HTTP_CREATED
         );
+
+        $this->saveToElastic($response);
+
+        return $response;
     }
 
     /**
@@ -134,5 +140,37 @@ class BooksController extends BaseController
             [],
             $request->getAcceptableContentTypes()
         );
+    }
+
+    /**
+     * @param Response $response
+     * @return bool
+     */
+    private function saveToElastic(Response $response): bool
+    {
+        $book = json_decode($response->getContent(), true);
+
+        $params = [
+            'index' => 'app',
+            'type'    => 'book',
+            'body'  => [
+                'id' => $book["data"]["id"],
+                'title' => $book["data"]["title"],
+                'description' => $book["data"]["description"],
+                'type' => $book["data"]["type"],
+                'authors' => []
+            ]
+        ];
+
+        foreach ($book["data"]["authors"] as $key => $author) {
+            $params["body"]["authors"][$key] = [
+                'id' => $author["id"],
+                'name' => $author["name"]
+            ];
+        }
+
+        $this->client->index($params);
+
+        return true;
     }
 }

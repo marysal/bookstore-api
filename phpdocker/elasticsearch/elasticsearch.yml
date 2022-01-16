@@ -1,6 +1,7 @@
+network.host: 0.0.0.0
 cluster.name: "chimeo-docker-cluster"
 node.name: "chimeo-docker-single-node"
-network.host: 0.0.0.0
+
 
 #http.cors.enabled: true
 #http.cors.allow-origin: "*"

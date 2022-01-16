@@ -26,10 +26,10 @@ class BeforeUpdateOrderSubscriber implements EventSubscriberInterface
                 "Only admin can change order status."
             );
         }
+    }
 
-
-        //var_dump($event->getStatus());die();
-
+    public function onOrderAfterValidate(BeforeUpdateOrderEvent $event)
+    {
         if(!empty($event->getEmail())) {
             $email = (new Email())
                 ->from('hello@example.com')
@@ -40,15 +40,13 @@ class BeforeUpdateOrderSubscriber implements EventSubscriberInterface
 
             $this->mailer->send($email);
         }
-
-
-
     }
 
     public static function getSubscribedEvents()
     {
         return [
-            'order.pre_update' => 'onOrderPreUpdate'
+            'order.pre_update' => 'onOrderPreUpdate',
+            'order.after_validate' => 'onOrderAfterValidate'
         ];
     }
 }

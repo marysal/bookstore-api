@@ -11,6 +11,7 @@ use App\Service\PaginatorService;
 use App\Traits\EntityManagerTrait;
 use App\Traits\JsonPathTrait;
 use Doctrine\ORM\EntityManagerInterface;
+use Elasticsearch\ClientBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -61,6 +62,7 @@ class BaseController extends AbstractController
      * @var PaginatorService
      */
     protected $paginator;
+
     /**
      * @var ResponseInterface
      */
@@ -70,6 +72,11 @@ class BaseController extends AbstractController
      * @var EventDispatcherInterface
      */
     protected $eventDispatcher;
+
+    /**
+     * @var \Elasticsearch\Client
+     */
+    protected $client;
 
     /**
      * @param BookRepository $bookRepository
@@ -90,9 +97,7 @@ class BaseController extends AbstractController
         ValidatorInterface     $validator,
         PaginatorService       $paginator,
         EventDispatcherInterface $eventDispatcher
-    )
-    {
-
+    ) {
         $this->entityManager = $manager;
         $this->serializer = $serializer;
         $this->bookRepository = $bookRepository;
@@ -101,8 +106,8 @@ class BaseController extends AbstractController
         $this->orderRepository = $orderRepository;
         $this->paginator = $paginator;
         $this->eventDispatcher = $eventDispatcher;
+        $this->client = ClientBuilder::create()->setHosts(["host" => $_ENV['ELASTIC_HOST']])->build();
     }
-
 
     /**
      * @param $data

@@ -100,11 +100,20 @@
     "egulias/email-validator": {
         "version": "3.1.2"
     },
+    "elasticsearch/elasticsearch": {
+        "version": "v6.8.2"
+    },
     "friendsofphp/proxy-manager-lts": {
         "version": "v1.0.5"
     },
     "fzaninotto/faker": {
         "version": "v1.9.2"
+    },
+    "guzzlehttp/ringphp": {
+        "version": "1.1.1"
+    },
+    "guzzlehttp/streams": {
+        "version": "3.0.0"
     },
     "knplabs/knp-components": {
         "version": "v3.4.0"
@@ -200,6 +209,9 @@
     },
     "psr/log": {
         "version": "1.1.4"
+    },
+    "react/promise": {
+        "version": "v2.8.0"
     },
     "sebastian/cli-parser": {
         "version": "1.0.1"
