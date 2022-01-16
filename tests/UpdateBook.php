@@ -2,7 +2,7 @@
 
 use Symfony\Component\HttpFoundation\Response;
 
-class UpdateBookTest extends BooksTest
+class UpdateBook extends Books
 {
     /**
      * @dataProvider bookUpdateDataProvider

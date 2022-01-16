@@ -2,13 +2,13 @@
 
 use Symfony\Component\HttpFoundation\Response;
 
-class DeleteAuthorTest extends BaseTest
+class DeleteOrder extends BaseTest
 {
     public function testDestroy()
     {
         self::$client->request(
             "DELETE",
-            "/api/authors/{$this->getLastAuthorId()}",
+            "/api/orders/{$this->getLastOrderId()}",
             [],
             [],
             self::$header
@@ -17,10 +17,10 @@ class DeleteAuthorTest extends BaseTest
         $this->assertSame(Response::HTTP_OK, self::$client->getResponse()->getStatusCode());
 
         $author = $this->em->createQuery(
-            'SELECT a FROM App\Entity\Author a
-             WHERE a.id = :id'
+            'SELECT o FROM App\Entity\Order o
+             WHERE o.id = :id'
         )
-        ->setParameter('id', $this->getLastAuthorId())
+        ->setParameter('id', $this->getLastOrderId())
         ->execute();
 
         $this->assertEmpty($author);
@@ -36,10 +36,10 @@ class DeleteAuthorTest extends BaseTest
         ->execute();
 
         $this->em->createQuery(
-            'DELETE FROM App\Entity\Order o
-             WHERE o.id = :id'
+            'DELETE FROM App\Entity\Author a
+             WHERE a.id = :id'
         )
-        ->setParameter('id', $this->getLastOrderId())
+        ->setParameter('id', $this->getLastAuthorId())
         ->execute();
     }
 }

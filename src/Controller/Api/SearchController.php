@@ -17,7 +17,7 @@ class SearchController extends BaseController
     ];
 
     /**
-     * @Route("/api/search", name="api_search")
+     * @Route("/api/search", name="api_search", methods={"GET"})
      */
     public function index(Request $request): Response
     {

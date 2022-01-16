@@ -4,7 +4,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Validator\Validation;
 use App\Entity\Order;
 
-class ExceptionOrderTest extends TestCase
+class ExceptionOrder extends TestCase
 {
     protected function setUp(): void
     {

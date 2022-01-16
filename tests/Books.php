@@ -3,7 +3,7 @@
 use App\Entity\Author;
 use App\Repository\AuthorRepository;
 
-class BooksTest extends BaseTest
+class Books extends BaseTest
 {
     protected static $bookDataForUpdate =  [
         "title" => "Changed title",

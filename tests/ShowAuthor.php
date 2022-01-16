@@ -2,7 +2,7 @@
 
 use Symfony\Component\HttpFoundation\Response;
 
-class ShowAuthorTest extends BaseTest
+class ShowAuthor extends BaseTest
 {
     public function testShow()
     {

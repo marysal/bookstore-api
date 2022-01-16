@@ -2,7 +2,7 @@
 
 use Symfony\Component\HttpFoundation\Response;
 
-class UpdateAuthorTest extends BaseTest
+class UpdateAuthor extends BaseTest
 {
     /**
      * @dataProvider authorUpdateDataProvider

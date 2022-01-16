@@ -3,7 +3,7 @@
 use Symfony\Component\HttpFoundation\Response;
 use App\Enum\StatusesOrdersEnum;
 
-class UpdateOrderTest extends BaseTest
+class UpdateOrder extends BaseTest
 {
     private static $orderDataForUpdate = [
         "phone" => "+375(29)257-12-34",

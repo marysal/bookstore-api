@@ -2,7 +2,7 @@
 
 use Symfony\Component\HttpFoundation\Response;
 
-class ListAuthorTest extends BaseTest
+class ListAuthor extends BaseTest
 {
     public function testList()
     {

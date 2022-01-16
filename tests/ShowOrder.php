@@ -2,13 +2,13 @@
 
 use Symfony\Component\HttpFoundation\Response;
 
-class ShowBookTest extends BooksTest
+class ShowOrder extends BaseTest
 {
     public function testShow()
     {
         self::$client->request(
             "GET",
-            "/api/books/{$this->getLastBookId()}",
+            "/api/orders/{$this->getLastOrderId()}",
             [],
             [],
             self::$header
@@ -19,6 +19,6 @@ class ShowBookTest extends BooksTest
         $this->assertSame(Response::HTTP_OK, self::$client->getResponse()->getStatusCode());
         $this->assertNotEmpty($content);
         $this->assertArrayHasKey("id", $content['data']);
-        $this->assertSame($this->getLastBookId(), $content['data']['id']);
+        $this->assertSame($this->getLastOrderId(), $content['data']['id']);
     }
 }

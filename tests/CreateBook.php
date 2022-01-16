@@ -2,7 +2,7 @@
 
 use Symfony\Component\HttpFoundation\Response;
 
-class CreateBookTest extends BooksTest
+class CreateBook extends Books
 {
     /**
      * @dataProvider bookDataProvider

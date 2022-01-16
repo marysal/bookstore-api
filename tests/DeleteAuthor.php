@@ -2,13 +2,13 @@
 
 use Symfony\Component\HttpFoundation\Response;
 
-class DeleteBookTest extends BooksTest
+class DeleteAuthor extends BaseTest
 {
     public function testDestroy()
     {
         self::$client->request(
             "DELETE",
-            "/api/books/{$this->getLastBookId()}",
+            "/api/authors/{$this->getLastAuthorId()}",
             [],
             [],
             self::$header
@@ -16,23 +16,23 @@ class DeleteBookTest extends BooksTest
 
         $this->assertSame(Response::HTTP_OK, self::$client->getResponse()->getStatusCode());
 
-        $book = $this->em->createQuery(
-            'SELECT b FROM App\Entity\Book b
-             WHERE b.id = :id'
+        $author = $this->em->createQuery(
+            'SELECT a FROM App\Entity\Author a
+             WHERE a.id = :id'
         )
-        ->setParameter('id', $this->getLastBookId())
+        ->setParameter('id', $this->getLastAuthorId())
         ->execute();
 
-        $this->assertEmpty($book);
+        $this->assertEmpty($author);
     }
 
     protected function tearDown(): void
     {
         $this->em->createQuery(
-            'DELETE FROM App\Entity\Author a
-             WHERE a.id = :id'
+            'DELETE FROM App\Entity\Book b
+             WHERE b.id = :id'
         )
-        ->setParameter('id', $this->getLastAuthorId())
+        ->setParameter('id', $this->getLastBookId())
         ->execute();
 
         $this->em->createQuery(

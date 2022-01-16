@@ -3,7 +3,7 @@
 use App\Entity\Book;
 use Symfony\Component\HttpFoundation\Response;
 
-class ListBookTest extends BooksTest
+class ListBook extends Books
 {
     protected function setUp(): void
     {

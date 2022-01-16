@@ -91,6 +91,7 @@ class BaseTest extends WebTestCase
         self::$header = [
             'HTTP_Authorization' => sprintf('%s %s', 'Bearer',  self::$token),
             'HTTP_CONTENT_TYPE' => 'application/json',
+            'CONTENT_TYPE' => 'application/json',
             'HTTP_ACCEPT'       => 'application/json'
         ];
     }
