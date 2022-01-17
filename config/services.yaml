@@ -40,3 +40,7 @@ services:
     App\Service\PaginatorService:
         arguments:
             $paginator: "@knp_paginator"
+
+    App\Service\JsonService:
+        arguments:
+            - "@service_container"

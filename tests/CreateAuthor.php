@@ -11,7 +11,7 @@ class CreateAuthor extends BaseTest
     {
         self::$client->request(
             "POST",
-            "/api/authors/create",
+            "/api/authors",
             self::$singleAuthor,
             [],
             self::$header,
@@ -40,7 +40,7 @@ class CreateAuthor extends BaseTest
 
 
         self::$client->request("POST",
-            "/api/authors/create",
+            "/api/authors",
             self::$singleAuthor,
             [],
             ($withToken) ? self::$header : [],

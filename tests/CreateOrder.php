@@ -18,7 +18,7 @@ class CreateOrder extends BaseTest
 
         self::$client->request(
             'POST',
-            '/api/orders/create',
+            '/api/orders',
             self::$singleOrder,
             [],
             self::$header,
@@ -63,7 +63,7 @@ class CreateOrder extends BaseTest
 
         self::$client->request(
             'POST',
-            '/api/orders/create',
+            '/api/orders',
             self::$singleOrder,
             [],
             self::$header,

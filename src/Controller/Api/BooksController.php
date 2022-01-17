@@ -26,6 +26,7 @@ class BooksController extends BaseController
 
         $booksQuery = $this->bookRepository->getQueryByFields($params);
 
+
         return $this->response(
             $this->paginator->getPaginate($booksQuery, $page),
             $request->getAcceptableContentTypes()
@@ -33,7 +34,7 @@ class BooksController extends BaseController
     }
 
     /**
-     * @Route("/api/books/create", name="app_api_books_create", methods={"POST"})
+     * @Route("/api/books", name="app_api_books_create", methods={"POST"})
      */
     public function create(Request $request): Response
     {
@@ -83,7 +84,7 @@ class BooksController extends BaseController
         Book $book,
         JsonService $jsonService
     ): Response {
-        $updatedData = $jsonService->applyJsonPatch($book, $request);
+        $updatedData = $jsonService->applyJsonPatch($book, $request, $this->entityName);
 
         $updatedBook = $this->serializer->deserialize(
             json_encode($updatedData),
@@ -138,7 +139,7 @@ class BooksController extends BaseController
      */
     public function destroy(Request $request, Book $book): Response
     {
-        $this->saveToDb($book, "remove");
+        $this->removeFromDb($book);
 
         return $this->response(
             [],

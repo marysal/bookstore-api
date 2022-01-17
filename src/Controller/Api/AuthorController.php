@@ -30,7 +30,7 @@ class AuthorController extends BaseController
     }
 
     /**
-     * @Route("/api/authors/create", name="app_api_authors_create", methods={"POST"})
+     * @Route("/api/authors", name="app_api_authors_create", methods={"POST"})
      */
     public function create(Request $request): Response
     {
@@ -91,7 +91,7 @@ class AuthorController extends BaseController
      */
     public function destroy(Request $request, Author $author): Response
     {
-        $this->saveToDb($author, "remove");
+        $this->removeFromDb($author);
 
         return $this->response(
             [],

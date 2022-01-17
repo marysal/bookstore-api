@@ -9,7 +9,6 @@ use App\Repository\BookRepository;
 use App\Repository\OrderRepository;
 use App\Service\PaginatorService;
 use App\Traits\EntityManagerTrait;
-use App\Traits\JsonPathTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Elasticsearch\ClientBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,11 +21,11 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\HttpClient\ResponseInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class BaseController extends AbstractController
 {
     use EntityManagerTrait;
-    use JsonPathTrait;
 
     /**
      * @var EntityManagerInterface
@@ -79,6 +78,11 @@ class BaseController extends AbstractController
     protected $client;
 
     /**
+     * @var RequestStack
+     */
+    protected $requestStack;
+
+    /**
      * @param BookRepository $bookRepository
      * @param AuthorRepository $authorRepository
      * @param OrderRepository $orderRepository
@@ -96,7 +100,8 @@ class BaseController extends AbstractController
         SerializerInterface    $serializer,
         ValidatorInterface     $validator,
         PaginatorService       $paginator,
-        EventDispatcherInterface $eventDispatcher
+        EventDispatcherInterface $eventDispatcher,
+        RequestStack $requestStack
     ) {
         $this->entityManager = $manager;
         $this->serializer = $serializer;
@@ -106,6 +111,7 @@ class BaseController extends AbstractController
         $this->orderRepository = $orderRepository;
         $this->paginator = $paginator;
         $this->eventDispatcher = $eventDispatcher;
+        $this->requestStack = $requestStack;
         $this->client = ClientBuilder::create()->setHosts(["host" => $_ENV['ELASTIC_HOST']])->build();
     }
 
@@ -182,13 +188,13 @@ class BaseController extends AbstractController
         string $responseStatus = Response::HTTP_OK
     ): Response {
 
-        $contentType = $this->getContentType($acceptableContentTypes);
+        $contentType = $this->getAcceptableContentType($acceptableContentTypes);
 
         $response = new Response();
 
         $response->setContent($this->getSerializedContent(
             $data,
-            $contentType
+            $this->requestStack->getCurrentRequest()->getFormat($acceptableContentTypes[0])
         ));
 
         $response->setStatusCode($responseStatus);
@@ -201,16 +207,23 @@ class BaseController extends AbstractController
      * @param $acceptableContentTypes
      * @return string
      */
-    public function getContentType($acceptableContentTypes): string
+    public function getAcceptableContentType($acceptableContentTypes): string
     {
-        $contentType = "json";
+        $contentType = null;
 
-        foreach ($acceptableContentTypes as $contentType) {
-            if(!in_array($contentType, ResponseContentTypesEnum::getContentTypesList())) {
+        foreach ($acceptableContentTypes as $acceptableContentType) {
+            if(!in_array($acceptableContentType, ResponseContentTypesEnum::getContentTypesList())) {
                 continue;
             }
 
-            return str_replace("application/", "", $contentType);
+            $contentType = $acceptableContentType;
+        }
+
+        if (empty($contentType)) {
+            throw new HttpException(
+                Response::HTTP_REQUESTED_RANGE_NOT_SATISFIABLE,
+                "The request content type is not supported by the service."
+            );
         }
 
         return $contentType;

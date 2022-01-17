@@ -31,7 +31,7 @@ class ElasticSearchTest extends BaseTest
 
         self::$client->request(
             "POST",
-            "/api/books/create",
+            "/api/books",
             self::$singleBook,
             [],
             self::$header,

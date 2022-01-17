@@ -27,9 +27,15 @@ trait EntityManagerTrait
         }
     }
 
-    protected function saveToDb($entity, $op = "persist"): void
+    protected function saveToDb($entity): void
     {
-        $this->entityManager->{$op}($entity);
+        $this->entityManager->persist($entity);
+        $this->entityManager->flush();
+    }
+
+    protected function removeFromDb($entity): void
+    {
+        $this->entityManager->remove($entity);
         $this->entityManager->flush();
     }
 }

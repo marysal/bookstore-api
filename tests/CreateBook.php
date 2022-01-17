@@ -13,7 +13,7 @@ class CreateBook extends Books
 
         self::$client->request(
             "POST",
-            "/api/books/create",
+            "/api/books",
             self::$singleBook,
             [],
             self::$header,
@@ -59,7 +59,7 @@ class CreateBook extends Books
 
         self::$client->request(
             "POST",
-            "/api/books/create",
+            "/api/books",
             self::$singleBook,
             [],
             ($withToken) ? self::$header : [],

@@ -33,7 +33,7 @@ class OrdersController extends BaseController
     }
 
     /**
-     * @Route("/api/orders/create", name="app_api_orders_create", methods={"POST"})
+     * @Route("/api/orders", name="app_api_orders_create", methods={"POST"})
      */
     public function create(Request $request): Response
     {
@@ -77,11 +77,11 @@ class OrdersController extends BaseController
         Order $order,
         JsonService $jsonService
     ): Response {
-        $updatedData = $jsonService->applyJsonPatch($order, $request);
+        $updatedData = $jsonService->applyJsonPatch($order, $request, $this->entityName);
 
         $updatedOrder = $this->serializer->deserialize(
             json_encode($updatedData),
-            Book::class,
+            Order::class,
             'json',
             [
                 AbstractNormalizer::OBJECT_TO_POPULATE => $order
@@ -136,7 +136,7 @@ class OrdersController extends BaseController
      */
     public function destroy(Request $request, Order $order): Response
     {
-        $this->saveToDb($order, "remove");
+        $this->removeFromDb($order);
 
         return $this->response(
             [],
