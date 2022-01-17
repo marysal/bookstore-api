@@ -4,6 +4,7 @@ namespace App\Controller\Api;
 
 use App\Entity\Author;
 use App\Entity\Book;
+use App\Service\JsonService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -75,11 +76,14 @@ class BooksController extends BaseController
     }
 
     /**
-     * @Route("/api/books/{id}", name="app_api_book_path_update", methods={"PATCH"})
+     * @Route("/api/books/{id}", name="app_api_book_patch_update", methods={"PATCH"})
      */
-    public function partialUpdate(Request $request, Book $book): Response
-    {
-        $updatedData = $this->applyJsonPath($book, $request);
+    public function partialUpdate(
+        Request $request,
+        Book $book,
+        JsonService $jsonService
+    ): Response {
+        $updatedData = $jsonService->applyJsonPatch($book, $request);
 
         $updatedBook = $this->serializer->deserialize(
             json_encode($updatedData),

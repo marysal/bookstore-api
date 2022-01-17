@@ -1,19 +1,22 @@
 <?php
 
-namespace App\Traits;
+namespace App\Service;
 
 use Swaggest\JsonDiff\JsonPatch;
+use Symfony\Bundle\FrameworkBundle\Controller\ControllerTrait;
 use Symfony\Component\HttpFoundation\Request;
 
-trait JsonPathTrait
+class JsonService
 {
+    use ControllerTrait;
+
     /**
      * Return updated data in stdClass
      * @param object $entity
      * @param Request $request
      * @return object
      */
-    protected function applyJsonPath(object $entity, Request $request): object
+    public function applyJsonPatch(object $entity, Request $request): object
     {
         $original = json_decode($this->json($entity)->getContent());
         $patch = JsonPatch::import(json_decode($request->getContent()));

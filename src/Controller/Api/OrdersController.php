@@ -5,6 +5,7 @@ namespace App\Controller\Api;
 use App\Entity\Book;
 use App\Entity\Order;
 use App\Event\BeforeUpdateOrderEvent;
+use App\Service\JsonService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -69,11 +70,14 @@ class OrdersController extends BaseController
     }
 
     /**
-     * @Route("/api/orders/{id}", name="app_api_order_path_update", methods={"PATCH"})
+     * @Route("/api/orders/{id}", name="app_api_order_patch_update", methods={"PATCH"})
      */
-    public function partialUpdate(Request $request, Order $order): Response
-    {
-        $updatedData = $this->applyJsonPath($order, $request);
+    public function partialUpdate(
+        Request $request,
+        Order $order,
+        JsonService $jsonService
+    ): Response {
+        $updatedData = $jsonService->applyJsonPatch($order, $request);
 
         $updatedOrder = $this->serializer->deserialize(
             json_encode($updatedData),
