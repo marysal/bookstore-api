@@ -18,6 +18,12 @@ class BaseTest extends WebTestCase
         "type" => "poetry"
     ];
 
+    protected $singleXMLBook = "
+       <title>Miss</title>
+       <description>New description</description>
+       <type>prose</type>
+    ";
+
     protected static $singleOrder = [
         "phone" => "+375(29)257-12-33",
         "address" => "Minsk, Leonardo Da Vinche str."

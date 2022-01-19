@@ -3,7 +3,6 @@
 namespace App\Controller\Api;
 
 use App\Entity\Author;
-use App\Entity\Book;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -11,8 +10,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 class AuthorController extends BaseController
 {
-    protected $relationEntity = Book::class;
-    protected $entityName = "author";
+    protected static $entityName = "author";
 
     /**
      * @Route("/api/authors", name="app_api_authors_list", methods={"GET"})
@@ -42,7 +40,7 @@ class AuthorController extends BaseController
 
         $this->validate($author);
 
-        $this->saveToDb($author);
+        $this->entityNormalizer->saveToDb($author);
 
         return $this->response(
             $author,
@@ -78,7 +76,7 @@ class AuthorController extends BaseController
 
         $this->validate($author);
 
-        $this->saveToDb($author);
+        $this->entityNormalizer->saveToDb($author);
 
         return $this->response(
             $author,
@@ -91,7 +89,7 @@ class AuthorController extends BaseController
      */
     public function destroy(Request $request, Author $author): Response
     {
-        $this->removeFromDb($author);
+        $this->entityNormalizer->removeFromDb($author);
 
         return $this->response(
             [],

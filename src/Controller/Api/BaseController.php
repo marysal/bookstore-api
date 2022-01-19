@@ -7,9 +7,8 @@ use App\Enum\ResponseContentTypesEnum;
 use App\Repository\AuthorRepository;
 use App\Repository\BookRepository;
 use App\Repository\OrderRepository;
+use App\Service\EntityNormalizer;
 use App\Service\PaginatorService;
-use App\Traits\EntityManagerTrait;
-use Doctrine\ORM\EntityManagerInterface;
 use Elasticsearch\ClientBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -25,12 +24,10 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class BaseController extends AbstractController
 {
-    use EntityManagerTrait;
-
     /**
-     * @var EntityManagerInterface
+     * @var EntityNormalizer
      */
-    protected $entityManager;
+    protected $entityNormalizer;
 
     /**
      * @var Serializer|SerializerInterface
@@ -86,7 +83,7 @@ class BaseController extends AbstractController
      * @param BookRepository $bookRepository
      * @param AuthorRepository $authorRepository
      * @param OrderRepository $orderRepository
-     * @param EntityManagerInterface $manager
+     * @param EntityNormalizer $manager
      * @param Serializer $serializer
      * @param ValidatorInterface $validator
      * @param PaginatorService $paginator
@@ -96,14 +93,14 @@ class BaseController extends AbstractController
         BookRepository         $bookRepository,
         AuthorRepository       $authorRepository,
         OrderRepository        $orderRepository,
-        EntityManagerInterface $manager,
+        EntityNormalizer       $entityNormalizer,
         SerializerInterface    $serializer,
         ValidatorInterface     $validator,
         PaginatorService       $paginator,
         EventDispatcherInterface $eventDispatcher,
         RequestStack $requestStack
     ) {
-        $this->entityManager = $manager;
+        $this->entityNormalizer = $entityNormalizer;
         $this->serializer = $serializer;
         $this->bookRepository = $bookRepository;
         $this->validator = $validator;

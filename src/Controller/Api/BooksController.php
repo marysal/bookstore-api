@@ -2,7 +2,6 @@
 
 namespace App\Controller\Api;
 
-use App\Entity\Author;
 use App\Entity\Book;
 use App\Service\JsonService;
 use Symfony\Component\HttpFoundation\Request;
@@ -12,9 +11,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 class BooksController extends BaseController
 {
-    protected $relationEntity = Author::class;
-    protected $entityName = "book";
-    protected $entityAddRelationMethodName  = "appendAuthor";
+    protected static $entityName = "books";
 
     /**
      * @Route("/api/books", name="app_api_books_list", methods={"GET"})
@@ -47,11 +44,15 @@ class BooksController extends BaseController
 
         $authors = $this->getIdsForLinkedTable($request);
 
-        $this->setEntityRelations($book, $authors);
+        $this->entityNormalizer->setEntityRelations(
+            self::$entityName,
+            $book,
+            $authors
+        );
 
         $this->validate($book);
 
-        $this->saveToDb($book);
+        $this->entityNormalizer->saveToDb($book);
 
         $response = $this->response(
             $book,
@@ -97,7 +98,7 @@ class BooksController extends BaseController
 
         $this->validate($updatedBook);
 
-        $this->saveToDb($updatedBook);
+        $this->entityNormalizer->saveToDb($updatedBook);
 
         return $this->response(
             $updatedBook,
@@ -122,11 +123,15 @@ class BooksController extends BaseController
 
         $authors = $this->getIdsForLinkedTable($request);
 
-        $this->setEntityRelations($book, $authors);
+        $this->entityNormalizer->setEntityRelations(
+            self::$entityName,
+            $book,
+            $authors
+        );
 
         $this->validate($book);
 
-        $this->saveToDb($book);
+        $this->entityNormalizer->saveToDb($book);
 
         return $this->response(
             $book,
@@ -139,7 +144,7 @@ class BooksController extends BaseController
      */
     public function destroy(Request $request, Book $book): Response
     {
-        $this->removeFromDb($book);
+        $this->entityNormalizer->removeFromDb($book);
 
         return $this->response(
             [],

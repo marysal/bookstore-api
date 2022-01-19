@@ -2,7 +2,6 @@
 
 namespace App\Controller\Api;
 
-use App\Entity\Book;
 use App\Entity\Order;
 use App\Event\BeforeUpdateOrderEvent;
 use App\Service\JsonService;
@@ -13,9 +12,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 
 class OrdersController extends BaseController
 {
-    protected $relationEntity = Book::class;
-    protected $entityName = "order";
-    protected $entityAddRelationMethodName  = "appendBookOrderList";
+    protected static $entityName = "orders";
 
     /**
      * @Route("/api/orders", name="app_api_orders_list", methods={"GET"})
@@ -43,11 +40,15 @@ class OrdersController extends BaseController
 
         $books = $this->getIdsForLinkedTable($request);
 
-        $this->setEntityRelations($order, $books);
+        $this->entityNormalizer->setEntityRelations(
+            self::$entityName,
+            $order,
+            $books
+        );
 
         $this->validate($order);
 
-        $this->saveToDb($order);
+        $this->entityNormalizer->saveToDb($order);
 
         $this->eventDispatcher->dispatch($event, 'order.after_validate');
 
@@ -77,7 +78,7 @@ class OrdersController extends BaseController
         Order $order,
         JsonService $jsonService
     ): Response {
-        $updatedData = $jsonService->applyJsonPatch($order, $request, $this->entityName);
+        $updatedData = $jsonService->applyJsonPatch($order, $request, self::$entityName);
 
         $updatedOrder = $this->serializer->deserialize(
             json_encode($updatedData),
@@ -90,7 +91,7 @@ class OrdersController extends BaseController
 
         $this->validate($updatedOrder);
 
-        $this->saveToDb($updatedOrder);
+        $this->entityNormalizer->saveToDb($updatedOrder);
 
         return $this->response(
             $updatedOrder,
@@ -117,13 +118,17 @@ class OrdersController extends BaseController
 
         $books = $this->getIdsForLinkedTable($request);
 
-        $this->setEntityRelations($order, $books);
+        $this->entityNormalizer->setEntityRelations(
+            self::$entityName,
+            $order,
+            $books
+        );
 
         $this->validate($order);
 
         $this->eventDispatcher->dispatch($event, 'order.after_validate');
 
-        $this->saveToDb($order);
+        $this->entityNormalizer->saveToDb($order);
 
         return $this->response(
             $order,
@@ -136,7 +141,7 @@ class OrdersController extends BaseController
      */
     public function destroy(Request $request, Order $order): Response
     {
-        $this->removeFromDb($order);
+        $this->entityNormalizer->removeFromDb($order);
 
         return $this->response(
             [],

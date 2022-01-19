@@ -44,3 +44,10 @@ services:
     App\Service\JsonService:
         arguments:
             - "@service_container"
+            -
+    App\Service\EntityNormalizer:
+        public: false
+        autowire: true
+        autoconfigure: true
+        tags:
+            - { name: serializer.normalizer }
