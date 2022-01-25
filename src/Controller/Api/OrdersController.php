@@ -3,16 +3,55 @@
 namespace App\Controller\Api;
 
 use App\Entity\Order;
+use App\Enum\ActionsGroupEnum;
 use App\Event\BeforeUpdateOrderEvent;
+use App\Repository\OrderRepository;
+use App\Service\EntityNormalizer;
 use App\Service\JsonService;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class OrdersController extends BaseController
 {
     protected static $entityName = "orders";
+
+    /**
+     * @var OrderRepository
+     */
+    protected $orderRepository;
+
+    /**
+     * @param OrderRepository $orderRepository
+     * @param EntityNormalizer $entityNormalizer
+     * @param SerializerInterface $serializer
+     * @param ValidatorInterface $validator
+     * @param EventDispatcherInterface $eventDispatcher
+     * @param RequestStack $requestStack
+     */
+    public function __construct(
+        OrderRepository $orderRepository,
+        EntityNormalizer $entityNormalizer,
+        SerializerInterface $serializer,
+        ValidatorInterface $validator,
+        EventDispatcherInterface $eventDispatcher,
+        RequestStack $requestStack
+    ) {
+        parent::__construct(
+            $entityNormalizer,
+            $serializer,
+            $validator,
+            $eventDispatcher,
+            $requestStack
+        );
+
+        $this->orderRepository = $orderRepository;
+    }
 
     /**
      * @Route("/api/orders", name="app_api_orders_list", methods={"GET"})
@@ -36,9 +75,13 @@ class OrdersController extends BaseController
     {
         $event = new BeforeUpdateOrderEvent($this->getUser(), $request);
 
-        $order = $this->serializer->deserialize($request->getContent(), Order::class, 'json');
+        $order = $this->serializer->deserialize(
+            $request->getContent(),
+            Order::class,
+            $request->getContentType()
+        );
 
-        $books = $this->getIdsForLinkedTable($request);
+        $books = $this->getIdsForLinkedTable($request, "books");
 
         $this->entityNormalizer->setEntityRelations(
             self::$entityName,
@@ -55,7 +98,8 @@ class OrdersController extends BaseController
         return $this->response(
             $order,
             $request->getAcceptableContentTypes(),
-            Response::HTTP_CREATED
+            Response::HTTP_CREATED,
+            self::$entityName
         );
     }
 
@@ -66,7 +110,9 @@ class OrdersController extends BaseController
     {
         return $this->response(
             $order,
-            $request->getAcceptableContentTypes()
+            $request->getAcceptableContentTypes(),
+            Response::HTTP_OK,
+            self::$entityName
         );
     }
 
@@ -95,7 +141,9 @@ class OrdersController extends BaseController
 
         return $this->response(
             $updatedOrder,
-            $request->getAcceptableContentTypes()
+            $request->getAcceptableContentTypes(),
+            Response::HTTP_OK,
+            self::$entityName
         );
     }
 
@@ -104,7 +152,12 @@ class OrdersController extends BaseController
      */
     public function update(Request $request, Order $order): Response
     {
-        $event = new BeforeUpdateOrderEvent($this->getUser(), $request);
+        $event = new BeforeUpdateOrderEvent(
+            $this->getUser(),
+            $request,
+            ActionsGroupEnum::UPDATE
+        );
+
         $this->eventDispatcher->dispatch($event, 'order.pre_update');
 
         $order = $this->serializer->deserialize(
@@ -116,7 +169,7 @@ class OrdersController extends BaseController
             ],
         );
 
-        $books = $this->getIdsForLinkedTable($request);
+        $books = $this->getIdsForLinkedTable($request, "books");
 
         $this->entityNormalizer->setEntityRelations(
             self::$entityName,
@@ -132,7 +185,9 @@ class OrdersController extends BaseController
 
         return $this->response(
             $order,
-            $request->getAcceptableContentTypes()
+            $request->getAcceptableContentTypes(),
+            Response::HTTP_OK,
+            self::$entityName
         );
     }
 

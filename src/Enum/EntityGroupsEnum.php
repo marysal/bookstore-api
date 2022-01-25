@@ -43,12 +43,12 @@ class EntityGroupsEnum
             self::ENTITY_BOOKS => [
                 "relation" => Author::class,
                 "name" => "book",
-                "addRelationMethodName " => "appendAuthor"
+                "addRelationMethodName" => "appendAuthor"
             ],
             self::ENTITY_ORDERS => [
-                "relation" =>  Book::class,
+                "relation" => Book::class,
                 "name" => "order",
-                "addRelationMethodName " => "appendBookOrderList"
+                "addRelationMethodName" => "appendBookOrderList"
             ],
         ];
     }

@@ -2,25 +2,31 @@
 
 use Symfony\Component\HttpFoundation\Response;
 
-class CreateBook extends Books
+class CreateBookXMLTest extends BookXmlTest
 {
     /**
      * @dataProvider bookDataProvider
      */
     public function testCreate($title, $description, $type)
     {
-        self::$singleBook["authors"] = [$this->getLastAuthorId()];
+        $xml = simplexml_load_string(self::$singleXMLBook);
+        $xml->authors = null;
+
+        foreach ([$this->getLastAuthorId()] as $id) {
+            $xml->authors->id[] = $id;
+        }
 
         self::$client->request(
             "POST",
             "/api/books",
-            self::$singleBook,
+            [],
             [],
             self::$header,
-            json_encode(self::$singleBook)
+            $xml->asXML()
         );
 
-        $content = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
+        $content = simplexml_load_string(self::$client->getResponse()->getContent());
+        $content = $this->object2array($content);
 
         $this->assertSame(Response::HTTP_CREATED, self::$client->getResponse()->getStatusCode());
         $this->assertNotEmpty($content);
@@ -32,7 +38,7 @@ class CreateBook extends Books
         $this->assertArrayHasKey("authors", $content['data']);
         $this->assertArrayHasKey("type", $content['data']);
         $this->assertSame($type, $content['data']['type']);
-        $this->assertSame($this->getLastAuthorId(), $content['data']['authors'][0]['id']);
+        $this->assertSame($this->getLastAuthorId(), (int)$content['data']['authors']['id']);
         $this->assertArrayNotHasKey("message", $content['data']);
         $this->assertArrayNotHasKey("error", $content['data']);
 
@@ -49,26 +55,32 @@ class CreateBook extends Books
         $responseCode,
         $message
     ) {
+        $xml = simplexml_load_string(self::$singleXMLBook);
+        $xml->authors = null;
+
         if($withAuthor) {
-            self::$singleBook["authors"] = [$this->getLastAuthorId()];
+            foreach ([$this->getLastAuthorId()] as $id) {
+                $xml->authors->id[] = $id;
+            }
         } elseif ($withNonExistentAuthor) {
-            self::$singleBook["authors"] = [$this->getLastAuthorId() + 9999];
-        } else {
-            unset(self::$singleBook["authors"]);
+            foreach ([$this->getLastAuthorId()] as $id) {
+                $xml->authors->id[] = $id + 9999;
+            }
         }
 
         self::$client->request(
             "POST",
             "/api/books",
-            self::$singleBook,
+            [],
             [],
             ($withToken) ? self::$header : [],
-            json_encode(self::$singleBook)
+            $xml->asXML()
         );
 
         $content = json_decode(self::$client->getResponse()->getContent(), true);
 
         $this->assertSame($responseCode, self::$client->getResponse()->getStatusCode());
+
 
         if($responseCode != Response::HTTP_CREATED) {
             $this->assertArrayHasKey("message", $content);
@@ -109,13 +121,13 @@ class CreateBook extends Books
                 "withToken" => true,
                 "withNonExistentAuthor" => false,
                 "responseCode" => Response::HTTP_BAD_REQUEST,
-                "message" => "The book must contain at least one author ID"
+                "message" => "The {book} must contain at least one relation ID"
             ],
             [
                 "withAuthor" => false,
                 "withToken" => true,
                 "withNonExistentAuthor" => true,
-                "responseCode" => Response::HTTP_NOT_FOUND,
+                "responseCode" => Response::HTTP_BAD_REQUEST,
                 "message" => "Object with this ID not found"
             ]
         ];
@@ -127,7 +139,7 @@ class CreateBook extends Books
             'DELETE FROM App\Entity\Book b
              WHERE b.id = :id'
         )
-        ->setParameter('id', $this->getLastBookId())
-        ->execute();
+            ->setParameter('id', $this->getLastBookId())
+            ->execute();
     }
 }

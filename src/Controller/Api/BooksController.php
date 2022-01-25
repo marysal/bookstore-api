@@ -3,15 +3,70 @@
 namespace App\Controller\Api;
 
 use App\Entity\Book;
+use App\Repository\BookRepository;
+use App\Service\ElasticSearchService;
+use App\Service\EntityNormalizer;
 use App\Service\JsonService;
+use App\Service\PaginatorService;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class BooksController extends BaseController
 {
     protected static $entityName = "books";
+
+    /**
+     * @var ElasticSearchService
+     */
+    protected $elasticSearch;
+
+    /**
+     * @var BookRepository
+     */
+    protected $bookRepository;
+
+    /**
+     * @var PaginatorService
+     */
+    protected $paginator;
+
+    /**
+     * @param BookRepository $bookRepository
+     * @param EntityNormalizer $entityNormalizer
+     * @param SerializerInterface $serializer
+     * @param ValidatorInterface $validator
+     * @param EventDispatcherInterface $eventDispatcher
+     * @param RequestStack $requestStack
+     * @param ElasticSearchService $elasticSearch
+     */
+    public function __construct(
+        BookRepository $bookRepository,
+        EntityNormalizer $entityNormalizer,
+        SerializerInterface $serializer,
+        ValidatorInterface $validator,
+        PaginatorService $paginator,
+        EventDispatcherInterface $eventDispatcher,
+        RequestStack $requestStack,
+        ElasticSearchService $elasticSearch
+    ) {
+        parent::__construct(
+            $entityNormalizer,
+            $serializer,
+            $validator,
+            $eventDispatcher,
+            $requestStack
+        );
+
+        $this->bookRepository = $bookRepository;
+        $this->paginator = $paginator;
+        $this->elasticSearch = $elasticSearch;
+    }
 
     /**
      * @Route("/api/books", name="app_api_books_list", methods={"GET"})
@@ -60,7 +115,7 @@ class BooksController extends BaseController
             Response::HTTP_CREATED
         );
 
-        $this->saveToElastic($response);
+        $this->elasticSearch->saveBookToElastic($book);
 
         return $response;
     }
@@ -85,7 +140,7 @@ class BooksController extends BaseController
         Book $book,
         JsonService $jsonService
     ): Response {
-        $updatedData = $jsonService->applyJsonPatch($book, $request, $this->entityName);
+        $updatedData = $jsonService->applyJsonPatch($book, $request, self::$entityName);
 
         $updatedBook = $this->serializer->deserialize(
             json_encode($updatedData),
@@ -99,6 +154,8 @@ class BooksController extends BaseController
         $this->validate($updatedBook);
 
         $this->entityNormalizer->saveToDb($updatedBook);
+
+        $this->elasticSearch->updateBookInElastic($request, $book);
 
         return $this->response(
             $updatedBook,
@@ -133,6 +190,8 @@ class BooksController extends BaseController
 
         $this->entityNormalizer->saveToDb($book);
 
+        $this->elasticSearch->updateBookInElastic($request, $book);
+
         return $this->response(
             $book,
             $request->getAcceptableContentTypes()
@@ -152,35 +211,5 @@ class BooksController extends BaseController
         );
     }
 
-    /**
-     * @param Response $response
-     * @return bool
-     */
-    private function saveToElastic(Response $response): bool
-    {
-        $book = json_decode($response->getContent(), true);
 
-        $params = [
-            'index' => 'app',
-            'type'    => 'book',
-            'body'  => [
-                'id' => $book["data"]["id"],
-                'title' => $book["data"]["title"],
-                'description' => $book["data"]["description"],
-                'type' => $book["data"]["type"],
-                'authors' => []
-            ]
-        ];
-
-        foreach ($book["data"]["authors"] as $key => $author) {
-            $params["body"]["authors"][$key] = [
-                'id' => $author["id"],
-                'name' => $author["name"]
-            ];
-        }
-
-        $this->client->index($params);
-
-        return true;
-    }
 }

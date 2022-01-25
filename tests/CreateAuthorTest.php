@@ -1,8 +1,9 @@
 <?php
 
+use App\Tests\BaseTest;
 use Symfony\Component\HttpFoundation\Response;
 
-class CreateAuthor extends BaseTest
+class CreateAuthorTest extends BaseTest
 {
     /**
      * @dataProvider authorDataProvider
@@ -18,7 +19,7 @@ class CreateAuthor extends BaseTest
             json_encode(self::$singleAuthor)
         );
 
-        $content = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
+        $content = json_decode(self::$client->getResponse()->getContent(), true);
 
         $this->assertSame(Response::HTTP_CREATED, self::$client->getResponse()->getStatusCode());
         $this->assertNotEmpty($content);

@@ -1,14 +1,18 @@
 <?php
 
+use App\Tests\BaseTest;
 use Symfony\Component\HttpFoundation\Response;
 
-class ListOrders extends BaseTest
+class ListOrdersTest extends BaseTest
 {
     public function testList()
     {
         self::$client->request(
             "GET",
-            "/api/orders"
+            "/api/orders",
+            [],
+            [],
+            self::$header
         );
 
         $this->assertSame(

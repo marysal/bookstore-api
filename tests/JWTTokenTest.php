@@ -1,5 +1,6 @@
 <?php
 
+use App\Tests\BaseTest;
 use Symfony\Component\HttpFoundation\Response;
 
 class JWTTokenTest extends BaseTest

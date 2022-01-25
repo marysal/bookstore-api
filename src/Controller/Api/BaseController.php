@@ -4,12 +4,7 @@ namespace App\Controller\Api;
 
 use App\Enum\EntityGroupsEnum;
 use App\Enum\ResponseContentTypesEnum;
-use App\Repository\AuthorRepository;
-use App\Repository\BookRepository;
-use App\Repository\OrderRepository;
 use App\Service\EntityNormalizer;
-use App\Service\PaginatorService;
-use Elasticsearch\ClientBuilder;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,7 +14,6 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Contracts\HttpClient\ResponseInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class BaseController extends AbstractController
@@ -35,34 +29,9 @@ class BaseController extends AbstractController
     protected $serializer;
 
     /**
-     * @var BookRepository
-     */
-    protected $bookRepository;
-
-    /**
      * @var ValidatorInterface
      */
     protected $validator;
-
-    /**
-     * @var AuthorRepository
-     */
-    protected $authorRepository;
-
-    /**
-     * @var OrderRepository
-     */
-    protected $orderRepository;
-
-    /**
-     * @var PaginatorService
-     */
-    protected $paginator;
-
-    /**
-     * @var ResponseInterface
-     */
-    protected $response;
 
     /**
      * @var EventDispatcherInterface
@@ -70,46 +39,30 @@ class BaseController extends AbstractController
     protected $eventDispatcher;
 
     /**
-     * @var \Elasticsearch\Client
-     */
-    protected $client;
-
-    /**
      * @var RequestStack
      */
     protected $requestStack;
 
     /**
-     * @param BookRepository $bookRepository
-     * @param AuthorRepository $authorRepository
-     * @param OrderRepository $orderRepository
-     * @param EntityNormalizer $manager
+     * @param EntityNormalizer $entityNormalizer
      * @param Serializer $serializer
      * @param ValidatorInterface $validator
-     * @param PaginatorService $paginator
      * @param EventDispatcherInterface $eventDispatcher
+     * @param RequestStack $requestStack
      */
     public function __construct(
-        BookRepository         $bookRepository,
-        AuthorRepository       $authorRepository,
-        OrderRepository        $orderRepository,
         EntityNormalizer       $entityNormalizer,
         SerializerInterface    $serializer,
         ValidatorInterface     $validator,
-        PaginatorService       $paginator,
         EventDispatcherInterface $eventDispatcher,
         RequestStack $requestStack
     ) {
         $this->entityNormalizer = $entityNormalizer;
         $this->serializer = $serializer;
-        $this->bookRepository = $bookRepository;
+
         $this->validator = $validator;
-        $this->authorRepository = $authorRepository;
-        $this->orderRepository = $orderRepository;
-        $this->paginator = $paginator;
         $this->eventDispatcher = $eventDispatcher;
         $this->requestStack = $requestStack;
-        $this->client = ClientBuilder::create()->setHosts(["host" => $_ENV['ELASTIC_HOST']])->build();
     }
 
     /**
@@ -182,7 +135,8 @@ class BaseController extends AbstractController
     protected function response(
         $data = [],
         array $acceptableContentTypes = ["json"],
-        string $responseStatus = Response::HTTP_OK
+        string $responseStatus = Response::HTTP_OK,
+        string $typesSerializeContent = "books"
     ): Response {
 
         $contentType = $this->getAcceptableContentType($acceptableContentTypes);
@@ -191,11 +145,12 @@ class BaseController extends AbstractController
 
         $response->setContent($this->getSerializedContent(
             $data,
-            $this->requestStack->getCurrentRequest()->getFormat($acceptableContentTypes[0])
+            $this->requestStack->getCurrentRequest()->getFormat($acceptableContentTypes[0]),
+            $typesSerializeContent
         ));
 
         $response->setStatusCode($responseStatus);
-        $response->headers->set('Content-Type', "application/{$contentType}");
+        $response->headers->set('Content-Type', $contentType);
 
         return $response;
     }
@@ -235,15 +190,21 @@ class BaseController extends AbstractController
         Request $request,
         string $tableName = "authors"
     ): array {
-        $ids = $request->get($tableName, [21]);
+        $ids = $request->get($tableName, []);
 
         if($request->getContentType() == "xml") {
             $xml = simplexml_load_string($request->getContent(), "SimpleXMLElement", LIBXML_NOCDATA);
             $json = json_encode($xml);
             $authors = json_decode($json,true);
-            $ids = $authors[$tableName]["id"];
-            if(is_string($ids)) {
-                $ids = [$ids];
+            $ids = [];
+            $receivedAuthorsIds = $authors[$tableName]["id"] ?? [];
+
+            if(is_string($receivedAuthorsIds)) {
+                $ids = [$receivedAuthorsIds];
+            } elseif (is_array($receivedAuthorsIds)) {
+                foreach ($receivedAuthorsIds as $id) {
+                    array_push($ids, $id);
+                }
             }
         }
 

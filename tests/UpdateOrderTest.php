@@ -1,9 +1,10 @@
 <?php
 
+use App\Tests\BaseTest;
 use Symfony\Component\HttpFoundation\Response;
 use App\Enum\StatusesOrdersEnum;
 
-class UpdateOrder extends BaseTest
+class UpdateOrderTest extends BaseTest
 {
     private static $orderDataForUpdate = [
         "phone" => "+375(29)257-12-34",
@@ -39,10 +40,9 @@ class UpdateOrder extends BaseTest
         $response = json_decode(self::$client->getResponse()->getContent(), true);
 
         if($responseCode == Response::HTTP_OK) {
-            $changedOrder = json_decode($response, true);
-            $this->assertNotEmpty($changedOrder);
-            $this->assertSame($order->getId(), $changedOrder['data']['id']);
-            $this->assertArrayHasKey("phone", $changedOrder['data']);
+            $this->assertNotEmpty($response);
+            $this->assertSame($order->getId(), $response['data']['id']);
+            $this->assertArrayHasKey("phone", $response['data']);
             $this->assertNotEquals($phone, $order->getPhone());
             $this->assertNotEquals($address, $order->getAddress());
         } else {

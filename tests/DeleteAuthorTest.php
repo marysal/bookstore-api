@@ -1,8 +1,9 @@
 <?php
 
+use App\Tests\BaseTest;
 use Symfony\Component\HttpFoundation\Response;
 
-class DeleteAuthor extends BaseTest
+class DeleteAuthorTest extends BaseTest
 {
     public function testDestroy()
     {

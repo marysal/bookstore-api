@@ -53,4 +53,15 @@ class OrderRepository extends ServiceEntityRepository
 
         return $query->getQuery()->execute();
     }
+
+    /**
+     * @param array $params
+     * @return \Doctrine\ORM\Query Returns an array of Order objects
+     */
+    public function getOrdersForPreviewDaysQuery(int $age_orders = 30)
+    {
+            return $this->getEntityManager()
+                ->createQuery("SELECT o from App:Order o where o.createdAt <= :date")
+                ->setParameter('date', new \DateTime('-'.$age_orders.'days'));
+    }
 }

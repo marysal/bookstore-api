@@ -2,6 +2,10 @@
 
 namespace App\Event;
 
+use App\Enum\ActionsGroupEnum;
+use App\Enum\StatusesOrdersEnum;
+use App\Service\ConvertorService;
+use phpDocumentor\Reflection\Type;
 use Symfony\Contracts\EventDispatcher\Event;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -19,16 +23,24 @@ class BeforeUpdateOrderEvent extends Event
 
     private $isAdmin;
 
+    private $typeEvent;
+
     /**
      * @param UserInterface|null $user|null
      * @param Request $request
      */
-    public function __construct(?UserInterface $user, Request $request)
+    public function __construct(?UserInterface $user, Request $request, $type = "create")
     {
+        //todo
+        if($request->getContentType() == "xml") {
+            $request = ConvertorService::xml2Request($request);
+        }
+
         $this->setUser($user);
         $this->setStatus($request);
         $this->setIsAdmin($user);
         $this->setEmail($request);
+        $this->setTypeEvent($type);
     }
 
     /**
@@ -40,16 +52,21 @@ class BeforeUpdateOrderEvent extends Event
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getStatus(): string
+    public function getStatus(): ?string
     {
         return $this->status;
     }
 
     private function setStatus(Request $request): void
     {
-        $status = $request->get('status', false);
+
+        $status = $request->get(
+            'status',
+            ($this->typeEvent == ActionsGroupEnum::UPDATE) ? null : StatusesOrdersEnum::STATUS_PENDING
+        );
+
         $this->status = $status;
     }
 
@@ -90,5 +107,21 @@ class BeforeUpdateOrderEvent extends Event
     {
         $email = $request->get('email', null);
         $this->email = $email;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTypeEvent(): string
+    {
+        return $this->typeEvent;
+    }
+
+    /**
+     * @param $type
+     */
+    private function setTypeEvent($type)
+    {
+        $this->typeEvent = $type;
     }
 }

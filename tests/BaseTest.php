@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Tests;
+
 use App\Entity\Author;
 use App\Entity\Book;
 use App\Entity\Order;
@@ -17,12 +19,6 @@ class BaseTest extends WebTestCase
         "description" => "New description",
         "type" => "poetry"
     ];
-
-    protected $singleXMLBook = "
-       <title>Miss</title>
-       <description>New description</description>
-       <type>prose</type>
-    ";
 
     protected static $singleOrder = [
         "phone" => "+375(29)257-12-33",
@@ -80,7 +76,7 @@ class BaseTest extends WebTestCase
         self::setBookId();
     }
 
-    private static function setToken(): void
+    protected static function setToken(): void
     {
         self::$client->request(
             "POST",
@@ -98,7 +94,7 @@ class BaseTest extends WebTestCase
             'HTTP_Authorization' => sprintf('%s %s', 'Bearer',  self::$token),
             'HTTP_CONTENT_TYPE' => 'application/json',
             'CONTENT_TYPE' => 'application/json',
-            'HTTP_ACCEPT'       => 'application/json'
+            'HTTP_ACCEPT'  => 'application/json'
         ];
     }
 

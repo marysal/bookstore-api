@@ -3,14 +3,54 @@
 namespace App\Controller\Api;
 
 use App\Entity\Author;
+use App\Repository\AuthorRepository;
+use App\Repository\OrderRepository;
+use App\Service\EntityNormalizer;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class AuthorController extends BaseController
 {
     protected static $entityName = "author";
+
+    /**
+     * @var AuthorRepository
+     */
+    protected $authorRepository;
+
+    /**
+     * @param AuthorRepository $authorRepository
+     * @param OrderRepository $orderRepository
+     * @param EntityNormalizer $entityNormalizer
+     * @param SerializerInterface $serializer
+     * @param ValidatorInterface $validator
+     * @param EventDispatcherInterface $eventDispatcher
+     * @param RequestStack $requestStack
+     */
+    public function __construct(
+        AuthorRepository $authorRepository,
+        EntityNormalizer $entityNormalizer,
+        SerializerInterface $serializer,
+        ValidatorInterface $validator,
+        EventDispatcherInterface $eventDispatcher,
+        RequestStack $requestStack
+    ) {
+        parent::__construct(
+            $entityNormalizer,
+            $serializer,
+            $validator,
+            $eventDispatcher,
+            $requestStack
+        );
+
+        $this->authorRepository = $authorRepository;
+    }
 
     /**
      * @Route("/api/authors", name="app_api_authors_list", methods={"GET"})

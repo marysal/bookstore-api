@@ -1,8 +1,9 @@
 <?php
 
+use App\Tests\Books;
 use Symfony\Component\HttpFoundation\Response;
 
-class DeleteBook extends Books
+class DeleteBookTest extends Books
 {
     public function testDestroy()
     {

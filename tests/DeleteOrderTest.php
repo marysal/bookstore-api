@@ -1,8 +1,9 @@
 <?php
 
+use App\Tests\BaseTest;
 use Symfony\Component\HttpFoundation\Response;
 
-class DeleteOrder extends BaseTest
+class DeleteOrderTest extends BaseTest
 {
     public function testDestroy()
     {

@@ -91,6 +91,8 @@
         "symfony/phpunit-bridge": "^6.0",
         "symfony/stopwatch": "4.4.*",
         "symfony/web-profiler-bundle": "4.4.*",
-        "ext-json": "*"
-    }
+        "ext-json": "*",
+        "ext-simplexml": "*"
+    },
+    "exclude-from-classmap": ["/vendor/"]
 }

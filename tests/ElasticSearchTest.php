@@ -1,5 +1,6 @@
 <?php
 
+use App\Tests\BaseTest;
 use Symfony\Component\HttpFoundation\Response;
 
 class ElasticSearchTest extends BaseTest
@@ -19,7 +20,6 @@ class ElasticSearchTest extends BaseTest
             json_encode(self::$singleBook)
         );
 
-
     }
 
     protected static $singleBook = [
@@ -32,8 +32,6 @@ class ElasticSearchTest extends BaseTest
      * @dataProvider bookDataProvider
      */
     public function testSearch($searchParams, $expectedResponseData) {
-
-        //var_dump($expectedResponseData);die();
 
         self::$client->request(
             "GET",
@@ -48,7 +46,6 @@ class ElasticSearchTest extends BaseTest
 
         $this->assertSame(Response::HTTP_OK, self::$client->getResponse()->getStatusCode());
         $this->assertSame($searchParams["title"], $content[0]['title']);
-        $this->assertSame($searchParams["description"], $content[0]['description']);
         $this->assertSame($searchParams["type"], $content[0]['type']);
         $this->assertSame($searchParams["author"], $content[0]['authors'][0]["name"]);
 
@@ -58,7 +55,7 @@ class ElasticSearchTest extends BaseTest
             $expectedResponseData["searchParamsUnsuccess"],
             [],
             self::$header,
-            json_encode( $expectedResponseData["searchParamsUnsuccess"])
+            json_encode($expectedResponseData["searchParamsUnsuccess"])
         );
 
         $this->assertSame(Response::HTTP_NOT_FOUND, self::$client->getResponse()->getStatusCode());
@@ -70,7 +67,6 @@ class ElasticSearchTest extends BaseTest
             [
                 "searchParams" => [
                     "title" => "Elastic title",
-                    "description" => "Elastic description",
                     "type" => "poetry",
                     "author" => "Fedor Dostojevskij"
                 ],
@@ -79,14 +75,13 @@ class ElasticSearchTest extends BaseTest
                         "title" => "Elastic title"
                     ],
                     "searchParamsUnsuccess" => [
-                        "title" => "Unsuccess Unsuccess"
+                        "title" => "Unsuccess Unsuccess "
                     ]
                 ]
             ],
             [
                 "searchParams" => [
                     "title" => "Elastic title",
-                    "description" => "Elastic description",
                     "type" => "poetry",
                     "author" => "Fedor Dostojevskij",
                 ],

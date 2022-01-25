@@ -6,6 +6,8 @@
 parameters:
     app.numVerifyApiUrl: '%env(NUM_VERIFY_API_URL)%'
     app.numVerifyApiKey: '%env(NUM_VERIFY_API_KEY)%'
+    app.sender: '%env(SENDER_EMAIL)%'
+
 
 services:
     # default configuration for services in *this* file

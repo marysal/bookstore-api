@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+<head>
+</head>
+<body>
+    {% if status == 'pending' %}
+        <p>An order has been created with the status {{ status }} </p>
+    {% else %}
+        <p>Status have been changed to {{ status }}</p>
+    {% endif %}
+</body>
+</html>

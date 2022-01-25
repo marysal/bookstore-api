@@ -1,8 +1,9 @@
 <?php
 
+use App\Tests\BaseTest;
 use Symfony\Component\HttpFoundation\Response;
 
-class ShowAuthor extends BaseTest
+class ShowAuthorTest extends BaseTest
 {
     public function testShow()
     {
@@ -14,7 +15,7 @@ class ShowAuthor extends BaseTest
             self::$header
         );
 
-        $content = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
+        $content = json_decode(self::$client->getResponse()->getContent(), true);
 
         $this->assertSame(Response::HTTP_OK, self::$client->getResponse()->getStatusCode());
         $this->assertNotEmpty($content);

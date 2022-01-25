@@ -1,8 +1,9 @@
 <?php
 
+use App\Tests\Books;
 use Symfony\Component\HttpFoundation\Response;
 
-class UpdateBook extends Books
+class UpdateBookTest extends Books
 {
     /**
      * @dataProvider bookUpdateDataProvider
@@ -20,7 +21,7 @@ class UpdateBook extends Books
             json_encode(self::$bookDataForUpdate)
         );
 
-        $changedContent = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
+        $changedContent = json_decode(self::$client->getResponse()->getContent(), true);
 
         $this->assertSame(Response::HTTP_OK, self::$client->getResponse()->getStatusCode());
         $this->assertNotEmpty($changedContent);
@@ -104,13 +105,13 @@ class UpdateBook extends Books
                 "withToken" => true,
                 "withNonExistentAuthor" => false,
                 "responseCode" => Response::HTTP_BAD_REQUEST,
-                "message" => "The book must contain at least one author ID"
+                "message" => "The {book} must contain at least one relation ID"
             ],
             [
                 "withAuthor" => false,
                 "withToken" => true,
                 "withNonExistentAuthor" => true,
-                "responseCode" => Response::HTTP_NOT_FOUND,
+                "responseCode" => Response::HTTP_BAD_REQUEST,
                 "message" => "Object with this ID not found"
             ]
         ];

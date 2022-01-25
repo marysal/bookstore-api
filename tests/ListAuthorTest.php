@@ -1,14 +1,18 @@
 <?php
 
+use App\Tests\BaseTest;
 use Symfony\Component\HttpFoundation\Response;
 
-class ListAuthor extends BaseTest
+class ListAuthorTest extends BaseTest
 {
     public function testList()
     {
         self::$client->request(
             "GET",
-            "/api/authors"
+            "/api/authors",
+            [],
+            [],
+            self::$header
         );
 
         $this->assertSame(

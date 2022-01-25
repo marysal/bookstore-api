@@ -1,9 +1,10 @@
 <?php
 
 use App\Enum\StatusesOrdersEnum;
+use App\Tests\BaseTest;
 use Symfony\Component\HttpFoundation\Response;
 
-class CreateOrder extends BaseTest
+class CreateOrderTest extends BaseTest
 {
     /**
      * @dataProvider orderDataProvider
@@ -25,7 +26,7 @@ class CreateOrder extends BaseTest
             json_encode(self::$singleOrder)
         );
 
-        $content = json_decode(json_decode(self::$client->getResponse()->getContent(), true), true);
+        $content = json_decode(self::$client->getResponse()->getContent(), true);
 
         $this->assertSame(Response::HTTP_CREATED, self::$client->getResponse()->getStatusCode());
         $this->assertNotEmpty($content);
@@ -117,14 +118,14 @@ class CreateOrder extends BaseTest
                 "wrongBookId" => false,
                 "wrongStatus" => false,
                 "responseCode" => Response::HTTP_BAD_REQUEST,
-                "message" => "The order must contain at least one book ID"
+                "message" => "The {order} must contain at least one relation ID"
             ],
             [
                 "phone" => "+375(29)257-11-33",
                 "withBook" => false,
                 "wrongBookId" => true,
                 "wrongStatus" => false,
-                "responseCode" => Response::HTTP_NOT_FOUND,
+                "responseCode" => Response::HTTP_BAD_REQUEST,
                 "message" => "Object with this ID not found"
             ],
             [

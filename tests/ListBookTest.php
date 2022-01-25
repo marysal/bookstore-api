@@ -1,9 +1,10 @@
 <?php
 
 use App\Entity\Book;
+use App\Tests\Books;
 use Symfony\Component\HttpFoundation\Response;
 
-class ListBook extends Books
+class ListBookTest extends Books
 {
     protected function setUp(): void
     {
@@ -29,7 +30,10 @@ class ListBook extends Books
     {
         self::$client->request(
             "GET",
-            "/api/books"
+            "/api/books",
+            [],
+            [],
+            self::$header
         );
 
         $this->assertSame(
@@ -47,9 +51,13 @@ class ListBook extends Books
     {
         self::$client->request(
             "GET",
-            "/api/books?page={$page}"
+            "/api/books?page={$page}",
+            [],
+            [],
+            self::$header,
         );
-        $content = json_decode(json_decode(self::$client->getResponse()->getContent()), true);
+        $content = json_decode(self::$client->getResponse()->getContent(), true);
+
         $this->assertCount($count, $content['data']);
     }
 

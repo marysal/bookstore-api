@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Tests;
+
 use App\Entity\Author;
 use App\Repository\AuthorRepository;
 

@@ -33,6 +33,7 @@ class Order
     private $id;
 
     /**
+     * @Groups("order")
      * @ORM\Column(type="string", length=180, unique=false, nullable=true)
      * @Assert\Email()
      */
