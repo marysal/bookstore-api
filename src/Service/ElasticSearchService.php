@@ -65,7 +65,7 @@ class ElasticSearchService
         $books = [];
 
         $searchResult = $this->client->search(
-            $this->searchParams
+            $searchParams
         );
 
         $searchResult = $searchResult['hits']['hits'] ?? [];
