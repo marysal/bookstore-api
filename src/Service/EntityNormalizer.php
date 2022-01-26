@@ -40,7 +40,6 @@ class EntityNormalizer extends ObjectNormalizer
     {
         $entityInfo = EntityGroupsEnum::getEntityInfoList()[$entityName];
 
-
         //todo make a validation service and move the generation of exceptions there
         if(empty($entityInfo)) {
             throw new HttpException(
@@ -72,8 +71,6 @@ class EntityNormalizer extends ObjectNormalizer
 
             $entity->{$entityInfo["addRelationMethodName"]}($object);
         }
-
-
     }
 
     public function saveToDb($entity): void

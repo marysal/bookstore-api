@@ -38,7 +38,7 @@ class JsonService
 
         $original = $this->container->get('serializer')->serialize($entity, 'json', array_merge([
             'json_encode_options' => JsonResponse::DEFAULT_ENCODING_OPTIONS,
-        ], ['groups' => 'order']));
+        ], ['groups' => $entityName]));
 
         $original = (object) json_decode($original, true);
         $patch = JsonPatch::import(json_decode(json_decode($request->getContent()), true));

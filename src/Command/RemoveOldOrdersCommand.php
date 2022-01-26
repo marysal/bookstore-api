@@ -38,9 +38,9 @@ class RemoveOldOrdersCommand extends Command
      * @param OrderRepository $orderRepository
      */
     public function __construct(
-        string $name = null,
         ContainerInterface $container,
-        OrderRepository $orderRepository
+        OrderRepository $orderRepository,
+        string $name = null
     ) {
         parent::__construct($name);
         $this->container = $container;
@@ -76,7 +76,9 @@ class RemoveOldOrdersCommand extends Command
             }
         } catch (Throwable $exception) {
         } finally {
+            $countUndeletedOrders = $countOrders - $deletetedOrders;
             $io = new SymfonyStyle($input, $output);
+
             $io->success(
                 'Found orders to delete: ' . $countOrders .
                 '.  Deleted: ' . $deletetedOrders .

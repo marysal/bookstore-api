@@ -58,7 +58,6 @@ class BeforeUpdateOrderSubscriber implements EventSubscriberInterface
                     'status' => $event->getStatus()
                 ]);
 
-
             $this->mailer->send($email);
         }
     }
